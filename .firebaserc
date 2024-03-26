@@ -1,0 +1,15 @@
+{
+  "projects": {
+    "default": "terrance-the-theif"
+  },
+  "targets": {
+    "terrance-the-theif": {
+      "hosting": {
+        "benchmark1": [
+          "terrance-app"
+        ]
+      }
+    }
+  },
+  "etags": {}
+}

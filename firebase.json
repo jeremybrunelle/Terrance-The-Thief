@@ -1,0 +1,30 @@
+{
+  "hosting": {
+    "target": "benchmark1",
+    "public": "out",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ],
+    "rewrites": [
+      {
+        "source": "**",
+        "destination": "/index.html"
+      },
+      {
+        "soucre": "/benchmark1",
+        "destination": "/benchmark1.html"
+    }
+    ]
+  },
+  "emulators": {
+    "hosting": {
+      "port": 5033
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
+  }
+}
