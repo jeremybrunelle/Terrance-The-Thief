@@ -30,12 +30,17 @@ import Item from "../GameSystems/ItemSystem/Item";
 import Healthpack from "../GameSystems/ItemSystem/Items/Healthpack";
 import LaserGun from "../GameSystems/ItemSystem/Items/LaserGun";
 import Key from "../GameSystems/ItemSystem/Items/Key";
+import Vent from "../GameSystems/ItemSystem/Items/Vent";
+import Safe from "../GameSystems/ItemSystem/Items/Safe";
+import Obstacle from "../GameSystems/ItemSystem/Items/Obstacle";
 import { ClosestPositioned } from "../GameSystems/Searching/HW4Reducers";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Position from "../GameSystems/Targeting/Position";
 import AstarStrategy from "../Pathfinding/AstarStrategy";
 import HW4Scene from "./HW4Scene";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
+import Label from "../../Wolfie2D/Nodes/UIElements/Label";
+import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 
 const BattlerGroups = {
     RED: 1,
@@ -53,12 +58,17 @@ export default class MainHW4Scene extends HW4Scene {
     /** Healthbars for the battlers */
     private healthbars: Map<number, HealthbarHUD>;
 
+    private moneyLabel: Label;
+    public money: number = 0;
 
     private bases: BattlerBase[];
 
     private healthpacks: Array<Healthpack>;
     private laserguns: Array<LaserGun>;
     private keys: Array<Key>;
+    private vents: Array<Vent>;
+    private safes: Array<Safe>;
+    private obstacles: Array<Obstacle>;
 
     // The wall layer of the tilemap
     private walls: OrthogonalTilemap;
@@ -75,6 +85,9 @@ export default class MainHW4Scene extends HW4Scene {
         this.laserguns = new Array<LaserGun>();
         this.healthpacks = new Array<Healthpack>();
         this.keys = new Array<Key>();
+        this.vents = new Array<Vent>();
+        this.safes = new Array<Safe>();
+        this.obstacles = new Array<Obstacle>();
     }
 
     /**
@@ -101,12 +114,18 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.object("healthpacks", "hw4_assets/data/items/healthpacks.json");
         this.load.object("laserguns", "hw4_assets/data/items/laserguns.json");
         this.load.object("keys", "hw4_assets/data/items/keys.json");
+        this.load.object("vents", "hw4_assets/data/items/vents.json");
+        this.load.object("safes", "hw4_assets/data/items/safes.json");
+        this.load.object("obstacles", "hw4_assets/data/items/obstacles.json");
 
         // Load the healthpack, inventory slot, and laser gun sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
         this.load.image("inventorySlot", "hw4_assets/sprites/inventory.png");
         this.load.image("laserGun", "hw4_assets/sprites/laserGun.png");
-        this.load.image("key", "hw4_assets/sprites/key.png")
+        this.load.image("key", "hw4_assets/sprites/key.png");
+        this.load.image("vent", "hw4_assets/sprites/vent.png");
+        this.load.image("safe", "hw4_assets/sprites/safe.png");
+        this.load.image("obstacle", "hw4_assets/sprites/obstacle.png");
     }
     /**
      * @see Scene.startScene
@@ -129,6 +148,7 @@ export default class MainHW4Scene extends HW4Scene {
         // Create the player
         this.initializePlayer();
         this.initializeItems();
+        this.initializeUI();
 
         this.initializeNavmesh();
 
@@ -364,6 +384,15 @@ export default class MainHW4Scene extends HW4Scene {
      * Initialize the items in the scene (healthpacks and laser guns)
      */
     protected initializeItems(): void {
+        let healthpacks = this.load.getObject("healthpacks");
+        this.healthpacks = new Array<Healthpack>(healthpacks.items.length);
+        for (let i = 0; i < healthpacks.items.length; i++) {
+            let sprite = this.add.sprite("healthpack", "primary");
+            this.healthpacks[i] = new Healthpack(sprite);
+            this.healthpacks[i].position.set(healthpacks.items[i][0], healthpacks.items[i][1]);
+            this.healthpacks[i].updateBoundary();
+        }
+    
         let keys = this.load.getObject("keys");
         this.keys = new Array<Key>(keys.items.length);
         for (let i = 0; i < keys.items.length; i++) {
@@ -373,7 +402,46 @@ export default class MainHW4Scene extends HW4Scene {
             this.keys[i].updateBoundary();
         }
 
+        let vents = this.load.getObject("vents");
+        this.vents = new Array<Vent>(vents.items.length);
+        for (let i = 0; i < vents.items.length; i++) {
+            let sprite = this.add.sprite("vent", "primary");
+            this.vents[i] = new Vent(sprite);
+            this.vents[i].position.set(vents.items[i][0], vents.items[i][1]);
+            this.vents[i].updateBoundary();
+        }
+
+        let safes = this.load.getObject("safes");
+        this.safes = new Array<Safe>(safes.items.length);
+        for (let i = 0; i < safes.items.length; i++) {
+            let sprite = this.add.sprite("safe", "primary");
+            this.safes[i] = new Safe(sprite);
+            this.safes[i].position.set(safes.items[i][0], safes.items[i][1]);
+            this.safes[i].updateBoundary();
+        }
+
+        let obstacles = this.load.getObject("obstacles");
+        this.obstacles = new Array<Obstacle>(obstacles.items.length);
+        for (let i = 0; i < obstacles.items.length; i++) {
+            let sprite = this.add.sprite("obstacle", "primary");
+            this.obstacles[i] = new Obstacle(sprite);
+            this.obstacles[i].position.set(obstacles.items[i][0], obstacles.items[i][1]);
+            this.obstacles[i].updateBoundary();
+        }
+
     }
+
+    initializeUI(): void {
+
+        this.addUILayer("money");
+
+        this.moneyLabel = <Label>this.add.uiElement(UIElementType.LABEL, "money", {position: new Vec2(75, 25), text: `$: ${this.money}`});
+        this.moneyLabel.size.set(200, 50);
+        this.moneyLabel.setHAlign("left");
+        this.moneyLabel.textColor = Color.WHITE;
+    }
+
+
     /**
      * Initializes the navmesh graph used by the NPCs in the HW4Scene. This method is a little buggy, and
      * and it skips over some of the positions on the tilemap. If you can fix my navmesh generation algorithm,
@@ -448,6 +516,12 @@ export default class MainHW4Scene extends HW4Scene {
 
     public getKeys(): Key[] { return this.keys; }
 
+    public getVents(): Vent[] { return this.vents; }
+
+    public getSafes(): Safe[] { return this.safes; }
+
+    public getObstacles(): Obstacle[] { return this.obstacles };
+
     /**
      * Checks if the given target position is visible from the given position.
      * @param position 
@@ -501,6 +575,42 @@ export default class MainHW4Scene extends HW4Scene {
             if (key.visible && this.player.collisionShape.overlaps(key.boundary)) {
                 key.visible = false;
                 this.player.inventory.add(key);
+            }
+        }
+
+        for (let vent of this.vents) {
+            if (vent.visible && this.player.collisionShape.overlaps(vent.boundary)) {
+                let random = Math.floor(Math.random() * this.vents.length);
+                let newPlayerPos: Vec2 = new Vec2(this.vents[random].position.x + 35, this.vents[random].position.y);
+                this.player.position = newPlayerPos;
+            }
+        }
+
+        for (let safe of this.safes) {
+            if (safe.visible && this.player.collisionShape.overlaps(safe.boundary) && safe.unlooted) {
+                for (let item of this.player.inventory.inventory.values()) {
+                    if (item instanceof Key) {
+                        this.money += 100;
+                        this.moneyLabel.text = `$: ${this.money}`;
+                        let key = item.id;
+                        this.player.inventory.remove(key);
+                    }
+                }
+            }
+        }
+
+        for (let obstacle of this.obstacles) {
+            if (obstacle.visible && this.player.collisionShape.overlaps(obstacle.boundary)) {
+                console.log(this.player.health);
+                this.player.health -= 10;
+                console.log(this.player.health);
+            }
+        }
+
+        for (let healthpack of this.healthpacks) {
+            if (healthpack.visible && this.player.collisionShape.overlaps(healthpack.boundary)) {
+                healthpack.visible = false;
+                this.player.health += healthpack.health;
             }
         }
     }
