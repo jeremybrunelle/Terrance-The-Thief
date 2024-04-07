@@ -8,7 +8,7 @@ import Battler from "../GameSystems/BattleSystem/Battler";
 
 export default abstract class HW4Scene extends Scene {
 
-    public abstract getBattlers(): Battler[];
+    public abstract getPlayer(): Battler;
 
     public abstract getWalls(): OrthogonalTilemap;
 

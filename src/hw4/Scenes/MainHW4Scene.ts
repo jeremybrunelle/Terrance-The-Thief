@@ -29,11 +29,13 @@ import Inventory from "../GameSystems/ItemSystem/Inventory";
 import Item from "../GameSystems/ItemSystem/Item";
 import Healthpack from "../GameSystems/ItemSystem/Items/Healthpack";
 import LaserGun from "../GameSystems/ItemSystem/Items/LaserGun";
+import Key from "../GameSystems/ItemSystem/Items/Key";
 import { ClosestPositioned } from "../GameSystems/Searching/HW4Reducers";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Position from "../GameSystems/Targeting/Position";
 import AstarStrategy from "../Pathfinding/AstarStrategy";
 import HW4Scene from "./HW4Scene";
+import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 
 const BattlerGroups = {
     RED: 1,
@@ -46,6 +48,7 @@ export default class MainHW4Scene extends HW4Scene {
     private inventoryHud: InventoryHUD;
 
     /** All the battlers in the HW4Scene (including the player) */
+    private player;
     private battlers: (Battler & Actor)[];
     /** Healthbars for the battlers */
     private healthbars: Map<number, HealthbarHUD>;
@@ -55,6 +58,7 @@ export default class MainHW4Scene extends HW4Scene {
 
     private healthpacks: Array<Healthpack>;
     private laserguns: Array<LaserGun>;
+    private keys: Array<Key>;
 
     // The wall layer of the tilemap
     private walls: OrthogonalTilemap;
@@ -70,6 +74,7 @@ export default class MainHW4Scene extends HW4Scene {
 
         this.laserguns = new Array<LaserGun>();
         this.healthpacks = new Array<Healthpack>();
+        this.keys = new Array<Key>();
     }
 
     /**
@@ -95,11 +100,13 @@ export default class MainHW4Scene extends HW4Scene {
         // Load the healthpack and lasergun loactions
         this.load.object("healthpacks", "hw4_assets/data/items/healthpacks.json");
         this.load.object("laserguns", "hw4_assets/data/items/laserguns.json");
+        this.load.object("keys", "hw4_assets/data/items/keys.json");
 
         // Load the healthpack, inventory slot, and laser gun sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
         this.load.image("inventorySlot", "hw4_assets/sprites/inventory.png");
         this.load.image("laserGun", "hw4_assets/sprites/laserGun.png");
+        this.load.image("key", "hw4_assets/sprites/key.png")
     }
     /**
      * @see Scene.startScene
@@ -145,6 +152,7 @@ export default class MainHW4Scene extends HW4Scene {
      * @see Scene.updateScene
      */
     public override updateScene(deltaT: number): void {
+        this.handleCollisions();
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
@@ -216,15 +224,15 @@ export default class MainHW4Scene extends HW4Scene {
      * Initializes the player in the scene
      */
     protected initializePlayer(): void {
-        let player = this.add.animatedSprite(PlayerActor, "player1", "primary");
-        player.position.set(40, 40);
-        player.battleGroup = 2;
+        this.player = this.add.animatedSprite(PlayerActor, "player1", "primary");
+        this.player.position.set(40, 40);
+        this.player.battleGroup = 2;
 
-        player.health = 10;
-        player.maxHealth = 10;
+        this.player.health = 10;
+        this.player.maxHealth = 10;
 
-        player.inventory.onChange = ItemEvent.INVENTORY_CHANGED
-        this.inventoryHud = new InventoryHUD(this, player.inventory, "inventorySlot", {
+        this.player.inventory.onChange = ItemEvent.INVENTORY_CHANGED
+        this.inventoryHud = new InventoryHUD(this, this.player.inventory, "inventorySlot", {
             start: new Vec2(232, 24),
             slotLayer: "slots",
             padding: 8,
@@ -232,20 +240,20 @@ export default class MainHW4Scene extends HW4Scene {
         });
 
         // Give the player physics
-        player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
+        this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
 
         // Give the player a healthbar
-        let healthbar = new HealthbarHUD(this, player, "primary", {size: player.size.clone().scaled(2, 1/2), offset: player.size.clone().scaled(0, -1/2)});
-        this.healthbars.set(player.id, healthbar);
+        let healthbar = new HealthbarHUD(this, this.player, "primary", {size: this.player.size.clone().scaled(2, 1/2), offset: this.player.size.clone().scaled(0, -1/2)});
+        this.healthbars.set(this.player.id, healthbar);
 
         // Give the player PlayerAI
-        player.addAI(PlayerAI);
+        this.player.addAI(PlayerAI);
 
         // Start the player in the "IDLE" animation
-        player.animation.play("IDLE");
+        this.player.animation.play("IDLE");
 
-        this.battlers.push(player);
-        this.viewport.follow(player);
+        this.battlers.push(this.player);
+        this.viewport.follow(this.player);
     }
     /**
      * Initialize the NPCs 
@@ -253,7 +261,7 @@ export default class MainHW4Scene extends HW4Scene {
     protected initializeNPCs(): void {
 
         // Get the object data for the red enemies
-        let red = this.load.getObject("red");
+        /*let red = this.load.getObject("red");
 
         // Initialize the red healers
         for (let i = 0; i < red.healers.length; i++) {
@@ -348,7 +356,7 @@ export default class MainHW4Scene extends HW4Scene {
             npc.animation.play("IDLE");
             this.battlers.push(npc);
         }
-
+        */
 
     }
 
@@ -356,22 +364,15 @@ export default class MainHW4Scene extends HW4Scene {
      * Initialize the items in the scene (healthpacks and laser guns)
      */
     protected initializeItems(): void {
-        let laserguns = this.load.getObject("laserguns");
-        this.laserguns = new Array<LaserGun>(laserguns.items.length);
-        for (let i = 0; i < laserguns.items.length; i++) {
-            let sprite = this.add.sprite("laserGun", "primary");
-            let line = <Line>this.add.graphic(GraphicType.LINE, "primary", {start: Vec2.ZERO, end: Vec2.ZERO});
-            this.laserguns[i] = LaserGun.create(sprite, line);
-            this.laserguns[i].position.set(laserguns.items[i][0], laserguns.items[i][1]);
+        let keys = this.load.getObject("keys");
+        this.keys = new Array<Key>(keys.items.length);
+        for (let i = 0; i < keys.items.length; i++) {
+            let sprite = this.add.sprite("key", "primary");
+            this.keys[i] = new Key(sprite);
+            this.keys[i].position.set(keys.items[i][0], keys.items[i][1]);
+            this.keys[i].updateBoundary();
         }
 
-        let healthpacks = this.load.getObject("healthpacks");
-        this.healthpacks = new Array<Healthpack>(healthpacks.items.length);
-        for (let i = 0; i < healthpacks.items.length; i++) {
-            let sprite = this.add.sprite("healthpack", "primary");
-            this.healthpacks[i] = new Healthpack(sprite);
-            this.healthpacks[i].position.set(healthpacks.items[i][0], healthpacks.items[i][1]);
-        }
     }
     /**
      * Initializes the navmesh graph used by the NPCs in the HW4Scene. This method is a little buggy, and
@@ -437,13 +438,15 @@ export default class MainHW4Scene extends HW4Scene {
         this.navManager.addNavigableEntity("navmesh", navmesh);
     }
 
-    public getBattlers(): Battler[] { return this.battlers; }
+    public getPlayer(): Battler { return this.player; }
 
     public getWalls(): OrthogonalTilemap { return this.walls; }
 
     public getHealthpacks(): Healthpack[] { return this.healthpacks; }
 
     public getLaserGuns(): LaserGun[] { return this.laserguns; }
+
+    public getKeys(): Key[] { return this.keys; }
 
     /**
      * Checks if the given target position is visible from the given position.
@@ -491,5 +494,14 @@ export default class MainHW4Scene extends HW4Scene {
         }
         return true;
 
+    }
+
+    handleCollisions() {
+        for (let key of this.keys) {
+            if (key.visible && this.player.collisionShape.overlaps(key.boundary)) {
+                key.visible = false;
+                this.player.inventory.add(key);
+            }
+        }
     }
 }

@@ -6,6 +6,7 @@ import PlayerActor from "../../Actors/PlayerActor";
 import { ItemEvent } from "../../Events";
 import Inventory from "../../GameSystems/ItemSystem/Inventory";
 import Item from "../../GameSystems/ItemSystem/Item";
+import MainHW4Scene from "../../Scenes/MainHW4Scene";
 import PlayerController from "./PlayerController";
 import { Idle, Invincible, Moving, Dead, PlayerStateType } from "./PlayerStates/PlayerState";
 
@@ -42,6 +43,7 @@ export default class PlayerAI extends StateMachineAI implements AI {
 
     public update(deltaT: number): void {
         super.update(deltaT);
+        
     }
 
     public destroy(): void {}
