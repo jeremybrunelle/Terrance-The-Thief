@@ -4,6 +4,7 @@ import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import GameNode from "../../Wolfie2D/Nodes/GameNode";
+import GameOver from "../Scenes/GameOver"
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Line from "../../Wolfie2D/Nodes/Graphics/Line";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
@@ -54,6 +55,7 @@ export default class MainHW4Scene extends HW4Scene {
 
     /** All the battlers in the HW4Scene (including the player) */
     private player;
+    private playerHealthbar: HealthbarHUD;
     private battlers: (Battler & Actor)[];
     /** Healthbars for the battlers */
     private healthbars: Map<number, HealthbarHUD>;
@@ -176,7 +178,9 @@ export default class MainHW4Scene extends HW4Scene {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
+        this.handlePlayerKilled()
         this.inventoryHud.update(deltaT);
+        this.playerHealthbar.update(deltaT);
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
     }
 
@@ -228,6 +232,12 @@ export default class MainHW4Scene extends HW4Scene {
         
     }
 
+    protected handlePlayerKilled(): void {
+        if (this.player.health <= 0) {
+            this.sceneManager.changeToScene(GameOver);
+        }
+    }
+
     /** Initializes the layers in the scene */
     protected initLayers(): void {
         this.addLayer("primary", 10);
@@ -263,8 +273,7 @@ export default class MainHW4Scene extends HW4Scene {
         this.player.addPhysics(new AABB(Vec2.ZERO, new Vec2(8, 8)));
 
         // Give the player a healthbar
-        let healthbar = new HealthbarHUD(this, this.player, "primary", {size: this.player.size.clone().scaled(2, 1/2), offset: this.player.size.clone().scaled(0, -1/2)});
-        this.healthbars.set(this.player.id, healthbar);
+        this.playerHealthbar = new HealthbarHUD(this, this.player, "primary", {size: this.player.size.clone().scaled(2, 1/2), offset: this.player.size.clone().scaled(0, -1/2)});
 
         // Give the player PlayerAI
         this.player.addAI(PlayerAI);
@@ -601,7 +610,7 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let obstacle of this.obstacles) {
             if (obstacle.visible && this.player.collisionShape.overlaps(obstacle.boundary)) {
-                this.player.health -= 10;
+                this.player.health -= .1;
             }
         }
 

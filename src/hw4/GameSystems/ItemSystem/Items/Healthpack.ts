@@ -18,7 +18,7 @@ export default class Healthpack extends Item {
 
     updateBoundary(): void {
 		this.boundary.center.set(this.position.x, this.position.y);
-		this.boundary.halfSize.set(16, 16);
+		this.boundary.halfSize.set(6, 6);
 	}
 
     public get health(): number { return this.hp; }

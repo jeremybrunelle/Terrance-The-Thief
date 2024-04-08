@@ -5,9 +5,8 @@ import Scene from "../../Wolfie2D/Scene/Scene";
 import Color from "../../Wolfie2D/Utils/Color";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import MainHW4Scene from "./MainHW4Scene";
+import ControlsScene from "./ControlsScene";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
-import AstarDemoScene from "./AstarDemoScene";
-import GuardDemoScene from "./GuardDemoScene";
 
 export default class MainMenu extends Scene {
     // Layers, for multiple main menu screens
@@ -30,24 +29,17 @@ export default class MainMenu extends Scene {
         play.backgroundColor = Color.TRANSPARENT;
         play.onClickEventId = "play";
 
-        const astar = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y), text: "A* Test Scene"});
-        astar.size.set(200, 50);
-        astar.borderWidth = 2;
-        astar.borderColor = Color.WHITE;
-        astar.backgroundColor = Color.TRANSPARENT;
-        astar.onClickEventId = "astar";
-
-        const guard = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 100), text: "Guard demo"});
-        guard.size.set(200, 50);
-        guard.borderWidth = 2;
-        guard.borderColor = Color.WHITE;
-        guard.backgroundColor = Color.TRANSPARENT;
-        guard.onClickEventId = "guard";
+        const controls = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y), text: "Controls"});
+        controls.size.set(200, 50);
+        controls.borderWidth = 2;
+        controls.borderColor = Color.WHITE;
+        controls.backgroundColor = Color.TRANSPARENT;
+        controls.onClickEventId = "controls";
+        
 
         // Subscribe to the button events
         this.receiver.subscribe("play");
-        this.receiver.subscribe("astar");
-        this.receiver.subscribe("guard");
+        this.receiver.subscribe("controls");
     }
 
     public updateScene(){
@@ -62,12 +54,8 @@ export default class MainMenu extends Scene {
                 this.sceneManager.changeToScene(MainHW4Scene);
                 break;
             }
-            case "astar": {
-                this.sceneManager.changeToScene(AstarDemoScene);
-                break;
-            }
-            case "guard": {
-                this.sceneManager.changeToScene(GuardDemoScene);
+            case "controls": {
+                this.sceneManager.changeToScene(ControlsScene);
                 break;
             }
         }
