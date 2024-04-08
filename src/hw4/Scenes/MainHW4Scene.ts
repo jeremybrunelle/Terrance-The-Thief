@@ -601,16 +601,19 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let obstacle of this.obstacles) {
             if (obstacle.visible && this.player.collisionShape.overlaps(obstacle.boundary)) {
-                console.log(this.player.health);
                 this.player.health -= 10;
-                console.log(this.player.health);
             }
         }
 
         for (let healthpack of this.healthpacks) {
             if (healthpack.visible && this.player.collisionShape.overlaps(healthpack.boundary)) {
                 healthpack.visible = false;
-                this.player.health += healthpack.health;
+                if (this.player.health + healthpack.health > this.player.maxHealth) {
+                    this.player.health = this.player.maxHealth;
+                }
+                else {
+                    this.player.health += healthpack.health;
+                }
             }
         }
     }
