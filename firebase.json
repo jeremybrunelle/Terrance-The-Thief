@@ -1,30 +1,29 @@
 {
   "hosting": {
-    "target": "benchmark1",
-    "public": "out",
+   
+    "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
+    "redirects": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "*",
+        "destination": "/benchmark2/dist/index.html",
+        "type": 301
       },
       {
         "soucre": "/benchmark1",
-        "destination": "/benchmark1.html"
-    }
+        "destination": "/benchmark1/index.html",
+        "type": 301
+    },
+    {
+      "soucre": "/benchmark2",
+      "destination": "/benchmark2/dist/index.html",
+      "type": 301}
+ 
+
     ]
-  },
-  "emulators": {
-    "hosting": {
-      "port": 5033
-    },
-    "ui": {
-      "enabled": true
-    },
-    "singleProjectMode": true
   }
 }

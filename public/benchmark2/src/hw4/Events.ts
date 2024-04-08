@@ -24,3 +24,11 @@ export enum HudEvent {
 export enum PlayerEvent {
     PLAYER_KILLED = "PLAYER_KILLED"
 }
+
+export enum Events {
+    IN_HIDING = "IN_HIDING",
+    NOT_HIDING = "NOT_HIDING",
+    PLAYER_GUARD_HIT = "PLAYER_GUARD_HIT",
+    PLAYER_IN_VIEW = "PLAYER_IN_VIEW"
+
+}

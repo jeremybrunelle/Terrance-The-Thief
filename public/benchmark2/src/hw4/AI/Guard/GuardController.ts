@@ -104,8 +104,14 @@ export default class GuardController extends StateMachineAI {
             this.handleEvent(this.receiver.getNextEvent());
         }
         
+        if (this.owner.position.distanceTo(this.player.position) < 50) {
+            this.handleChase();
+        }else{
+            this.changeState(GuardStates.PATROL);
+        }
+
         if(this.owner.collisionShape.overlaps(this.player.collisionShape)){
-            this.handlePlayerGooseCollision();   
+            this.handlePlayerGuardCollision();   
         }
         
 	}
@@ -128,11 +134,9 @@ export default class GuardController extends StateMachineAI {
         }
     }
 
-    protected handlePlayerInView(): void {
-        
-    }
+
    
-    protected handlePlayerGooseCollision(): void {
+    protected handlePlayerGuardCollision(): void {
         this.emitter.fireEvent(Events.PLAYER_GUARD_HIT);
        
     }

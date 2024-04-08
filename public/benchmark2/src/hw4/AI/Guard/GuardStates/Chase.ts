@@ -27,20 +27,25 @@ export default class Chase extends GuardState {
 		let playerVec = this.parent.playerVec;
 
         // Get the input direction from the player controller
-		if(this.parent.getAwareness()||(Math.abs(this.owner.position.x - playerVec.x) > 100) || (Math.abs(this.owner.position.y - playerVec.y) > 100)){
-            console.log("FISH LOST");
-            this.finished(GuardStates.PATROL);
-        }
+		if (this.parent.getAwareness() || (Math.abs(this.owner.position.x - playerVec.x) > 100) || (Math.abs(this.owner.position.y - playerVec.y) > 100)) {
+			console.log("FISH LOST");
+			this.finished(GuardStates.PATROL);
+		} 
+		if(playerVec.y > this.owner.position.y){
+				this.parent.velocity.y += this.gravity * deltaT;
+				
+		this.parent.velocity.y += this.gravity * deltaT;		
 
-		this.parent.velocity.y += this.gravity*deltaT; 
-		
-		
-			if(playerVec.x > this.owner.position.x){
-				this.parent.velocity.x = (this.parent.speed);
-			}else{
-				this.parent.velocity.x = -(this.parent.speed);
-		
-			}
+		if(playerVec.x > this.owner.position.x){
+			this.parent.velocity.x = this.parent.speed;
+		}else{
+			this.parent.velocity.x = -this.parent.speed;
+		}
+		if(playerVec.y > this.owner.position.y){
+			this.parent.velocity.y = this.parent.speed;
+		}else{	
+			this.parent.velocity.y = -this.parent.speed;
+		}
 		
 		// If we're walking left, flip the sprite
 		this.owner.invertX = this.parent.velocity.x < 0;
@@ -48,6 +53,7 @@ export default class Chase extends GuardState {
 			this.owner.move(this.parent.velocity.scaled(deltaT));
 		
 	}
+}
 
 	onExit(): Record<string, any> {
 		this.owner.animation.stop();

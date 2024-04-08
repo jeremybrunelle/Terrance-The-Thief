@@ -1,3 +1,4 @@
+/*
 import PositionGraph from "../../Wolfie2D/DataTypes/Graphs/PositionGraph";
 import Actor from "../../Wolfie2D/DataTypes/Interfaces/Actor";
 import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
@@ -33,9 +34,9 @@ import HW4Scene from "./HW4Scene";
 export default class GuardDemoScene extends HW4Scene {
 
     private player: PlayerActor;
-    /** All the battlers in the HW4Scene (including the player) */
+
     private battlers: (Battler & Actor)[];
-    /** Healthbars for the battlers */
+
     private healthbars: Map<number, HealthbarHUD>;
 
     private healthpacks: Array<Healthpack>;
@@ -57,9 +58,6 @@ export default class GuardDemoScene extends HW4Scene {
         this.healthpacks = new Array<Healthpack>();
     }
 
-    /**
-     * @see Scene.update()
-     */
     public override loadScene() {
         // Load the player and enemy spritesheets
         this.load.spritesheet("player1", "hw4_assets/spritesheets/player1.json");
@@ -86,9 +84,6 @@ export default class GuardDemoScene extends HW4Scene {
         this.load.image("inventorySlot", "hw4_assets/sprites/inventory.png");
         this.load.image("laserGun", "hw4_assets/sprites/laserGun.png");
     }
-    /**
-     * @see Scene.startScene
-     */
     public override startScene() {
         // Add in the tilemap
         let tilemapLayers = this.add.tilemap("level");
@@ -125,9 +120,7 @@ export default class GuardDemoScene extends HW4Scene {
         this.receiver.subscribe(BattlerEvent.BATTLER_KILLED);
         this.receiver.subscribe(BattlerEvent.BATTLER_RESPAWN);
     }
-    /**
-     * @see Scene.updateScene
-     */
+
     public override updateScene(deltaT: number): void {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
@@ -135,10 +128,7 @@ export default class GuardDemoScene extends HW4Scene {
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
     }
 
-    /**
-     * Handle events from the rest of the game
-     * @param event a game event
-     */
+
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             case BattlerEvent.BATTLER_KILLED: {
@@ -167,7 +157,7 @@ export default class GuardDemoScene extends HW4Scene {
         }
     }
 
-    /** Initializes the layers in the scene */
+
     protected initLayers(): void {
         this.addLayer("primary", 10);
         this.addUILayer("slots");
@@ -176,9 +166,7 @@ export default class GuardDemoScene extends HW4Scene {
         this.getLayer("items").setDepth(2);
     }
 
-    /**
-     * Initializes the player in the scene
-     */
+
     protected initializePlayer(): void {
         let player = this.add.animatedSprite(PlayerActor, "player1", "primary");
         player.position.set(40, 40);
@@ -196,9 +184,7 @@ export default class GuardDemoScene extends HW4Scene {
         this.battlers.push(player);
         this.viewport.follow(player);
     }
-    /**
-     * Initialize the NPCs 
-     */
+
     protected initializeNPCs(): void {
 
         // Get the object data for the red enemies
@@ -249,9 +235,7 @@ export default class GuardDemoScene extends HW4Scene {
         follower2.animation.play("IDLE");
         this.battlers.push(follower2);
     }
-    /**
-     * Initialize the items in the scene (healthpacks and laser guns)
-     */
+
     protected initializeItems(): void {
         let laserguns = this.load.getObject("laserguns");
         this.laserguns = new Array<LaserGun>(laserguns.items.length);
@@ -262,13 +246,7 @@ export default class GuardDemoScene extends HW4Scene {
             this.laserguns[i].position.set(laserguns.items[i][0], laserguns.items[i][1]);
         }
     }
-    /**
-     * Initializes the navmesh graph used by the NPCs in the HW4Scene. This method is a little buggy, and
-     * and it skips over some of the positions on the tilemap. If you can fix my navmesh generation algorithm,
-     * go for it.
-     * 
-     * - Peter
-     */
+
     protected initializeNavmesh(): void {
         // Create the graph
         this.graph = new PositionGraph();
@@ -374,3 +352,4 @@ export default class GuardDemoScene extends HW4Scene {
 
     }
 }
+*/

@@ -17,18 +17,18 @@ import Color from "../../Wolfie2D/Utils/Color";
 import MathUtils from "../../Wolfie2D/Utils/MathUtils";
 import NPCActor from "../Actors/NPCActor";
 import PlayerActor from "../Actors/PlayerActor";
-//import GuardBehavior from "../AI/NPC/NPCBehavior/GaurdBehavior";
-//import HealerBehavior from "../AI/NPC/NPCBehavior/HealerBehavior";
+import GuardBehavior from "../AI/NPC/NPCBehavior/GaurdBehavior";
+import HealerBehavior from "../AI/NPC/NPCBehavior/HealerBehavior";
 import PlayerAI from "../AI/Player/PlayerAI";
 import { ItemEvent, PlayerEvent, BattlerEvent } from "../Events";
 import Battler from "../GameSystems/BattleSystem/Battler";
-//import BattlerBase from "../GameSystems/BattleSystem/BattlerBase";
+import BattlerBase from "../GameSystems/BattleSystem/BattlerBase";
 import HealthbarHUD from "../GameSystems/HUD/HealthbarHUD";
 import InventoryHUD from "../GameSystems/HUD/InventoryHUD";
 import Inventory from "../GameSystems/ItemSystem/Inventory";
 import Item from "../GameSystems/ItemSystem/Item";
 import Healthpack from "../GameSystems/ItemSystem/Items/Healthpack";
-//import LaserGun from "../GameSystems/ItemSystem/Items/LaserGun";
+import LaserGun from "../GameSystems/ItemSystem/Items/LaserGun";
 import Key from "../GameSystems/ItemSystem/Items/Key";
 import Vent from "../GameSystems/ItemSystem/Items/Vent";
 import Safe from "../GameSystems/ItemSystem/Items/Safe";
@@ -63,10 +63,10 @@ export default class MainHW4Scene extends HW4Scene {
     private moneyLabel: Label;
     public money: number = 0;
 
-//    private bases: BattlerBase[];
+    private bases: BattlerBase[];
 
     private healthpacks: Array<Healthpack>;
- //   private laserguns: Array<LaserGun>;
+    private laserguns: Array<LaserGun>;
     private keys: Array<Key>;
     private vents: Array<Vent>;
     private safes: Array<Safe>;
@@ -84,7 +84,7 @@ export default class MainHW4Scene extends HW4Scene {
 //        this.battlers = new Array<Battler & Actor>();
         this.healthbars = new Map<number, HealthbarHUD>();
 
-    //    this.laserguns = new Array<LaserGun>();
+        this.laserguns = new Array<LaserGun>();
         this.healthpacks = new Array<Healthpack>();
         this.keys = new Array<Key>();
         this.vents = new Array<Vent>();
@@ -208,7 +208,7 @@ export default class MainHW4Scene extends HW4Scene {
     }
 
     protected handleItemRequest(node: GameNode, inventory: Inventory): void {
-        let items: Item[] = new Array<Item>(...this.healthpacks).filter((item: Item) => {
+        let items: Item[] = new Array<Item>(...this.healthpacks, ...this.laserguns).filter((item: Item) => {
             return item.inventory === null && item.position.distanceTo(node.position) <= 100;
         });
 
@@ -452,7 +452,7 @@ export default class MainHW4Scene extends HW4Scene {
 
     public getHealthpacks(): Healthpack[] { return this.healthpacks; }
 
-   // public getLaserGuns(): LaserGun[] { return this.laserguns; }
+    public getLaserGuns(): LaserGun[] { return this.laserguns; }
 
     public getKeys(): Key[] { return this.keys; }
 

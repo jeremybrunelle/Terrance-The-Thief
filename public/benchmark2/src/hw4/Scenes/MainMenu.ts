@@ -7,7 +7,7 @@ import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import MainHW4Scene from "./MainHW4Scene";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import AstarDemoScene from "./AstarDemoScene";
-import GuardDemoScene from "./GuardDemoScene";
+//import GuardDemoScene from "./GuardDemoScene";
 
 export default class MainMenu extends Scene {
     // Layers, for multiple main menu screens
@@ -37,17 +37,12 @@ export default class MainMenu extends Scene {
         astar.backgroundColor = Color.TRANSPARENT;
         astar.onClickEventId = "astar";
 
-        const guard = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 100), text: "Guard demo"});
-        guard.size.set(200, 50);
-        guard.borderWidth = 2;
-        guard.borderColor = Color.WHITE;
-        guard.backgroundColor = Color.TRANSPARENT;
-        guard.onClickEventId = "guard";
+
 
         // Subscribe to the button events
         this.receiver.subscribe("play");
         this.receiver.subscribe("astar");
-        this.receiver.subscribe("guard");
+
     }
 
     public updateScene(){
@@ -66,10 +61,7 @@ export default class MainMenu extends Scene {
                 this.sceneManager.changeToScene(AstarDemoScene);
                 break;
             }
-            case "guard": {
-                this.sceneManager.changeToScene(GuardDemoScene);
-                break;
-            }
+
         }
     }
 }
