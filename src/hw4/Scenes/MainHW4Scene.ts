@@ -68,7 +68,9 @@ export default class MainHW4Scene extends HW4Scene {
     public money: number = 0;
 
     private bases: BattlerBase[];
-
+    private guards;
+    private seenFlag: boolean = false;
+    private healthTimer: number;
     private healthpacks: Array<Healthpack>;
     private laserguns: Array<LaserGun>;
     private keys: Array<Key>;
@@ -91,7 +93,7 @@ export default class MainHW4Scene extends HW4Scene {
 
         this.battlers = new Array<Battler & Actor>();
         this.healthbars = new Map<number, HealthbarHUD>();
-
+        this.healthTimer = 0;
         this.laserguns = new Array<LaserGun>();
         this.healthpacks = new Array<Healthpack>();
         this.keys = new Array<Key>();
@@ -206,6 +208,14 @@ export default class MainHW4Scene extends HW4Scene {
         this.inventoryHud.update(deltaT);
         this.playerHealthbar.update(deltaT);
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
+        this.enterChase();
+        if(this.seenFlag){
+            if(this.healthTimer == 15){
+            this.player.health -= .25;
+            this.healthTimer = 0;
+            }
+            this.healthTimer++;
+        }
     }
 
     /**
@@ -312,9 +322,30 @@ export default class MainHW4Scene extends HW4Scene {
      * Initialize the NPCs 
      */
     protected initializeNPCs(): void {
+        this.guards= this.add.animatedSprite(NPCActor, "player1", "primary");
+        this.guards.position.set(100, 100);
 
     }
+    protected enterChase(): void {
 
+        if (this.guards.position.distanceTo(this.player.position) < 50) {
+            this.seenFlag = true;
+            if (this.guards.position.x > this.player.position.x) {
+                this.guards.position.x -= .2;
+            }else{
+                this.guards.position.x += .2;
+            }
+            if (this.guards.position.y > this.player.position.y) {
+                this.guards.position.y -= .2;
+            }else{
+                this.guards.position.y += .2;
+            }
+        }else{
+            this.seenFlag = false;
+        }
+
+    
+}
     /**
      * Initialize the items in the scene
      */
