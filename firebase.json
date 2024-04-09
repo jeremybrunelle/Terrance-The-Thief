@@ -1,21 +1,37 @@
 {
   "hosting": {
-    "target": "benchmark1",
-    "public": "out",
+    "public": "public",
     "ignore": [
       "firebase.json",
       "**/.*",
       "**/node_modules/**"
     ],
-    "rewrites": [
+    "redirects": [
       {
-        "source": "**",
-        "destination": "/index.html"
+        "source": "*",        
+        "destination": "/benchmark1/index.html",
+        "type": 301
       },
       {
-        "soucre": "/benchmark1",
-        "destination": "/benchmark1.html"
-    }
+        "source": "/testing",
+        "destination": "/full_game/dist/index.html",
+        "type": 301
+      },
+      {
+        "source": "/benchmark1",
+        "destination": "/benchmark1/index.html",
+        "type": 301
+      },
+      {
+        "source": "/benchmark2",
+        "destination": "/benchmark2/dist/index.html",
+        "type": 301
+      },
+      {
+        "source": "/benchmark3",
+        "destination": "/benchmark1/index.html",
+        "type": 301
+      }
     ]
   },
   "emulators": {
