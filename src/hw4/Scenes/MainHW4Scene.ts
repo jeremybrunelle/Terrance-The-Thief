@@ -45,6 +45,7 @@ import HW4Scene from "./HW4Scene";
 import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
+import NavigationPath from "../../Wolfie2D/Pathfinding/NavigationPath";
 
 const BattlerGroups = {
     RED: 1,
