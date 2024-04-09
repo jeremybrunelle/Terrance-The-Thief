@@ -33,6 +33,7 @@ import Key from "../GameSystems/ItemSystem/Items/Key";
 import Vent from "../GameSystems/ItemSystem/Items/Vent";
 import Safe from "../GameSystems/ItemSystem/Items/Safe";
 import Obstacle from "../GameSystems/ItemSystem/Items/Obstacle";
+import Locker from "../GameSystems/ItemSystem/Items/Locker";
 import { ClosestPositioned } from "../GameSystems/Searching/HW4Reducers";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Position from "../GameSystems/Targeting/Position";
@@ -70,6 +71,7 @@ export default class MainHW4Scene extends HW4Scene {
     private vents: Array<Vent>;
     private safes: Array<Safe>;
     private obstacles: Array<Obstacle>;
+    private lockers: Array<Locker>;
 
     // The wall layer of the tilemap
     private walls: OrthogonalTilemap;
@@ -89,6 +91,7 @@ export default class MainHW4Scene extends HW4Scene {
         this.vents = new Array<Vent>();
         this.safes = new Array<Safe>();
         this.obstacles = new Array<Obstacle>();
+        this.lockers = new Array<Locker>();
     }
 
     /**
@@ -112,6 +115,7 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.object("vents", "hw4_assets/data/items/vents.json");
         this.load.object("safes", "hw4_assets/data/items/safes.json");
         this.load.object("obstacles", "hw4_assets/data/items/obstacles.json");
+        this.load.object("lockers", "hw4_assets/data/items/lockers.json");
 
         // Load the healthpack, inventory slot, and laser gun sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
@@ -121,6 +125,7 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.image("vent", "hw4_assets/sprites/vent.png");
         this.load.image("safe", "hw4_assets/sprites/safe.png");
         this.load.image("obstacle", "hw4_assets/sprites/obstacle.png");
+        this.load.image("locker", "hw4_assets/sprites/locker.png");
     }
     /**
      * @see Scene.startScene
@@ -168,6 +173,16 @@ export default class MainHW4Scene extends HW4Scene {
      */
     public override updateScene(deltaT: number): void {
         this.handleCollisions();
+
+        for (let locker of this.lockers) {
+            if (locker.visible && this.player.collisionShape.overlaps(locker.boundary)) {
+                this.player.visible = false
+            }
+            else {
+                this.player.visible = true;
+            }
+        }
+
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
@@ -333,6 +348,15 @@ export default class MainHW4Scene extends HW4Scene {
             this.obstacles[i].updateBoundary();
         }
 
+        let lockers = this.load.getObject("lockers");
+        this.lockers = new Array<Locker>(lockers.items.length);
+        for (let i = 0; i < lockers.items.length; i++) {
+            let sprite = this.add.sprite("locker", "primary");
+            this.lockers[i] = new Locker(sprite);
+            this.lockers[i].position.set(lockers.items[i][0], lockers.items[i][1]);
+            this.lockers[i].updateBoundary();
+        }
+
     }
 
     initializeUI(): void {
@@ -425,6 +449,8 @@ export default class MainHW4Scene extends HW4Scene {
     public getSafes(): Safe[] { return this.safes; }
 
     public getObstacles(): Obstacle[] { return this.obstacles };
+
+    public getLockers(): Locker[] { return this.lockers };
 
     /**
      * Checks if the given target position is visible from the given position.
@@ -520,5 +546,6 @@ export default class MainHW4Scene extends HW4Scene {
                 }
             }
         }
+
     }
 }

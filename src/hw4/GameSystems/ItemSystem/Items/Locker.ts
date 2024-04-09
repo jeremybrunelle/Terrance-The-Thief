@@ -4,7 +4,7 @@ import Sprite from "../../../../Wolfie2D/Nodes/Sprites/Sprite";
 import HW4Scene from "../../../Scenes/HW4Scene";
 import Item from "../Item";
 
-export default class Obstacle extends Item {
+export default class Locker extends Item {
 
     boundary: AABB;
 
