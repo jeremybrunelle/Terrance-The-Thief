@@ -6,6 +6,7 @@ import Color from "../../Wolfie2D/Utils/Color";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import MainHW4Scene from "./MainHW4Scene";
 import ControlsScene from "./ControlsScene";
+import HelpScene from "./HelpScene";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 
 export default class MainMenu extends Scene {
@@ -35,11 +36,19 @@ export default class MainMenu extends Scene {
         controls.borderColor = Color.WHITE;
         controls.backgroundColor = Color.TRANSPARENT;
         controls.onClickEventId = "controls";
+
+        const help = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x, center.y + 100), text: "How to Play"});
+        help.size.set(200, 50);
+        help.borderWidth = 2;
+        help.borderColor = Color.WHITE;
+        help.backgroundColor = Color.TRANSPARENT;
+        help.onClickEventId = "help";
         
 
         // Subscribe to the button events
         this.receiver.subscribe("play");
         this.receiver.subscribe("controls");
+        this.receiver.subscribe("help");
     }
 
     public updateScene(){
@@ -58,6 +67,10 @@ export default class MainMenu extends Scene {
                 this.sceneManager.changeToScene(ControlsScene);
                 break;
             }
+            case "help": {
+                this.sceneManager.changeToScene(HelpScene);
+                break;
+            }          
         }
     }
 }

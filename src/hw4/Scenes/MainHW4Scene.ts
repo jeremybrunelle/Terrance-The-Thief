@@ -34,6 +34,9 @@ import Vent from "../GameSystems/ItemSystem/Items/Vent";
 import Safe from "../GameSystems/ItemSystem/Items/Safe";
 import Obstacle from "../GameSystems/ItemSystem/Items/Obstacle";
 import Locker from "../GameSystems/ItemSystem/Items/Locker";
+import Electricity from "../GameSystems/ItemSystem/Items/Electricity";
+import Off from "../GameSystems/ItemSystem/Items/Off";
+import Switch from "../GameSystems/ItemSystem/Items/Switch";
 import { ClosestPositioned } from "../GameSystems/Searching/HW4Reducers";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Position from "../GameSystems/Targeting/Position";
@@ -72,6 +75,9 @@ export default class MainHW4Scene extends HW4Scene {
     private safes: Array<Safe>;
     private obstacles: Array<Obstacle>;
     private lockers: Array<Locker>;
+    private electricities: Array<Electricity>;
+    private offs: Array<Off>;
+    private switches: Array<Switch>;
 
     // The wall layer of the tilemap
     private walls: OrthogonalTilemap;
@@ -92,6 +98,9 @@ export default class MainHW4Scene extends HW4Scene {
         this.safes = new Array<Safe>();
         this.obstacles = new Array<Obstacle>();
         this.lockers = new Array<Locker>();
+        this.electricities = new Array<Electricity>();
+        this.offs = new Array<Off>();
+        this.switches = new Array<Switch>();
     }
 
     /**
@@ -116,6 +125,9 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.object("safes", "hw4_assets/data/items/safes.json");
         this.load.object("obstacles", "hw4_assets/data/items/obstacles.json");
         this.load.object("lockers", "hw4_assets/data/items/lockers.json");
+        this.load.object("electricities", "hw4_assets/data/items/electricities.json");
+        this.load.object("switches", "hw4_assets/data/items/switches.json");
+        this.load.object("offs", "hw4_assets/data/items/offs.json");
 
         // Load the healthpack, inventory slot, and laser gun sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
@@ -126,6 +138,9 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.image("safe", "hw4_assets/sprites/safe.png");
         this.load.image("obstacle", "hw4_assets/sprites/obstacle.png");
         this.load.image("locker", "hw4_assets/sprites/locker.png");
+        this.load.image("electricity", "hw4_assets/sprites/electricity.png");
+        this.load.image("switch", "hw4_assets/sprites/switch.png");
+        this.load.image("off", "hw4_assets/sprites/off.png");
     }
     /**
      * @see Scene.startScene
@@ -357,6 +372,33 @@ export default class MainHW4Scene extends HW4Scene {
             this.lockers[i].updateBoundary();
         }
 
+        let electricities = this.load.getObject("electricities");
+        this.electricities = new Array<Electricity>(electricities.items.length);
+        for (let i = 0; i < electricities.items.length; i++) {
+            let sprite = this.add.sprite("electricity", "primary");
+            this.electricities[i] = new Electricity(sprite);
+            this.electricities[i].position.set(electricities.items[i][0], electricities.items[i][1]);
+            this.electricities[i].updateBoundary();
+        }
+
+        let switches = this.load.getObject("switches");
+        this.switches = new Array<Switch>(switches.items.length);
+        for (let i = 0; i < switches.items.length; i++) {
+            let sprite = this.add.sprite("switch", "primary");
+            this.switches[i] = new Switch(sprite);
+            this.switches[i].position.set(switches.items[i][0], switches.items[i][1]);
+            this.switches[i].updateBoundary();
+        }
+
+        let offs = this.load.getObject("offs");
+        this.offs = new Array<Off>(offs.items.length);
+        for (let i = 0; i < offs.items.length; i++) {
+            let sprite = this.add.sprite("off", "primary");
+            this.offs[i] = new Off(sprite);
+            this.offs[i].position.set(offs.items[i][0], offs.items[i][1]);
+            this.offs[i].updateBoundary();
+        }
+
     }
 
     initializeUI(): void {
@@ -452,6 +494,10 @@ export default class MainHW4Scene extends HW4Scene {
 
     public getLockers(): Locker[] { return this.lockers };
 
+    public getElectricities(): Electricity[] { return this.electricities };
+
+    public getOffs(): Off[] { return this.offs };
+
     /**
      * Checks if the given target position is visible from the given position.
      * @param position 
@@ -544,6 +590,21 @@ export default class MainHW4Scene extends HW4Scene {
                 else {
                     this.player.health += healthpack.health;
                 }
+            }
+        }
+
+        for (let electricity of this.electricities) {
+            if (electricity.visible && this.player.collisionShape.overlaps(electricity.boundary)) {
+                this.player.health = 0;
+            }
+        }
+
+        for (let off of this.offs) {
+            if (off.visible && this.player.collisionShape.overlaps(off.boundary)) {
+                for (let electricity of this.electricities) {
+                    electricity.visible = false;
+                }
+                off.visible = false;
             }
         }
 

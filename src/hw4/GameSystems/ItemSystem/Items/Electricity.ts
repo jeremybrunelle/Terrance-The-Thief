@@ -4,7 +4,7 @@ import Sprite from "../../../../Wolfie2D/Nodes/Sprites/Sprite";
 import HW4Scene from "../../../Scenes/HW4Scene";
 import Item from "../Item";
 
-export default class Locker extends Item {
+export default class Electricity extends Item {
 
     boundary: AABB;
 
@@ -15,7 +15,7 @@ export default class Locker extends Item {
 
     updateBoundary(): void {
 		this.boundary.center.set(this.position.x, this.position.y);
-		this.boundary.halfSize.set(12, 12);
+		this.boundary.halfSize.set(1, 12);
 	}
 
 }
