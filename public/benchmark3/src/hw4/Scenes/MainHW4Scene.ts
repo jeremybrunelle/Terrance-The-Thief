@@ -37,6 +37,7 @@ import Locker from "../GameSystems/ItemSystem/Items/Locker";
 import Electricity from "../GameSystems/ItemSystem/Items/Electricity";
 import Off from "../GameSystems/ItemSystem/Items/Off";
 import Switch from "../GameSystems/ItemSystem/Items/Switch";
+import Moneybag from "../GameSystems/ItemSystem/Items/Moneybag";
 import { ClosestPositioned } from "../GameSystems/Searching/HW4Reducers";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Position from "../GameSystems/Targeting/Position";
@@ -68,7 +69,7 @@ export default class MainHW4Scene extends HW4Scene {
     public money: number = 0;
 
     private bases: BattlerBase[];
-    private guards;
+    private guards: Array<AnimatedSprite>;
     private seenFlag: boolean = false;
     private healthTimer: number;
     private healthpacks: Array<Healthpack>;
@@ -81,6 +82,7 @@ export default class MainHW4Scene extends HW4Scene {
     private electricities: Array<Electricity>;
     private offs: Array<Off>;
     private switches: Array<Switch>;
+    private moneybags: Array<Moneybag>;
 
     // The wall layer of the tilemap
     private walls: OrthogonalTilemap;
@@ -104,6 +106,8 @@ export default class MainHW4Scene extends HW4Scene {
         this.electricities = new Array<Electricity>();
         this.offs = new Array<Off>();
         this.switches = new Array<Switch>();
+        this.moneybags = new Array<Moneybag>();
+        this.guards = new Array<AnimatedSprite>();
     }
 
     /**
@@ -131,6 +135,7 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.object("electricities", "hw4_assets/data/items/electricities.json");
         this.load.object("switches", "hw4_assets/data/items/switches.json");
         this.load.object("offs", "hw4_assets/data/items/offs.json");
+        this.load.object("moneybags", "hw4_assets/data/items/moneybags.json");
 
         // Load the healthpack, inventory slot, and laser gun sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
@@ -144,6 +149,7 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.image("electricity", "hw4_assets/sprites/electricity.png");
         this.load.image("switch", "hw4_assets/sprites/switch.png");
         this.load.image("off", "hw4_assets/sprites/off.png");
+        this.load.image("moneybag", "hw4_assets/sprites/moneybag.png");
     }
     /**
      * @see Scene.startScene
@@ -204,11 +210,11 @@ export default class MainHW4Scene extends HW4Scene {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-        this.handlePlayerKilled()
         this.inventoryHud.update(deltaT);
         this.playerHealthbar.update(deltaT);
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
         this.enterChase();
+        this.handlePlayerKilled();
         if(this.seenFlag){
             if(this.healthTimer == 15){
             this.player.health -= .25;
@@ -322,30 +328,42 @@ export default class MainHW4Scene extends HW4Scene {
      * Initialize the NPCs 
      */
     protected initializeNPCs(): void {
-        this.guards= this.add.animatedSprite(NPCActor, "player1", "primary");
-        this.guards.position.set(100, 100);
+        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+        this.guards[0].position.set(100, 100);
+        this.guards[1].position.set(300, 100);
+        this.guards[2].position.set(100, 300);
 
     }
     protected enterChase(): void {
 
-        if (this.guards.position.distanceTo(this.player.position) < 50) {
-            this.seenFlag = true;
-            if (this.guards.position.x > this.player.position.x) {
-                this.guards.position.x -= .2;
-            }else{
-                this.guards.position.x += .2;
-            }
-            if (this.guards.position.y > this.player.position.y) {
-                this.guards.position.y -= .2;
-            }else{
-                this.guards.position.y += .2;
-            }
-        }else{
-            this.seenFlag = false;
-        }
+        /* Changed this method such that it loops over an array of guards which are AnimatedSprites and
+        ensures that the player is visible before chasing
 
-    
-}
+        Also, handled the player damage directly here as a temporary fix since the current damage
+        handling doesn't work with an array of guards */
+
+        for (let i = 0; i < this.guards.length; i++) {
+            if (this.guards[i].position.distanceTo(this.player.position) < 50 && this.player.visible && this.isTargetVisible(this.player.position, this.guards[i].position)) {
+                this.seenFlag = true;
+                this.player.health -= .02;
+                if (this.guards[i].position.x > this.player.position.x) {
+                    this.guards[i].position.x -= .7;
+                }else{
+                    this.guards[i].position.x += .7;
+                }
+                if (this.guards[i].position.y > this.player.position.y) {
+                    this.guards[i].position.y -= .7;
+                }else{
+                    this.guards[i].position.y += .7;
+                }
+            }else{
+                this.seenFlag = false;
+            }
+        }    
+    }
+
     /**
      * Initialize the items in the scene
      */
@@ -431,6 +449,15 @@ export default class MainHW4Scene extends HW4Scene {
             this.offs[i].updateBoundary();
         }
 
+        let moneybags = this.load.getObject("moneybags");
+        this.moneybags = new Array<Moneybag>(moneybags.items.length);
+        for (let i = 0; i < moneybags.items.length; i++) {
+            let sprite = this.add.sprite("moneybag", "primary");
+            this.moneybags[i] = new Moneybag(sprite);
+            this.moneybags[i].position.set(moneybags.items[i][0], moneybags.items[i][1]);
+            this.moneybags[i].updateBoundary();
+        }
+
     }
 
     initializeUI(): void {
@@ -509,26 +536,18 @@ export default class MainHW4Scene extends HW4Scene {
     }
 
     public getPlayer(): Battler { return this.player; }
-
     public getWalls(): OrthogonalTilemap { return this.walls; }
-
     public getHealthpacks(): Healthpack[] { return this.healthpacks; }
-
     public getLaserGuns(): LaserGun[] { return this.laserguns; }
-
     public getKeys(): Key[] { return this.keys; }
-
     public getVents(): Vent[] { return this.vents; }
-
     public getSafes(): Safe[] { return this.safes; }
-
     public getObstacles(): Obstacle[] { return this.obstacles };
-
     public getLockers(): Locker[] { return this.lockers };
-
     public getElectricities(): Electricity[] { return this.electricities };
-
     public getOffs(): Off[] { return this.offs };
+    public getMoneybags(): Moneybag[] { return this.moneybags };
+    public getBattlers(): Battler[] { return null };
 
     /**
      * Checks if the given target position is visible from the given position.
@@ -563,7 +582,7 @@ export default class MainHW4Scene extends HW4Scene {
                     let tilePos = new Vec2(col * tileSize.x + tileSize.x / 2, row * tileSize.y + tileSize.y / 2);
 
                     // Create a collider for this tile
-                    let collider = new AABB(tilePos, tileSize.scaled(1 / 2));
+                    let collider = new AABB(tilePos, tileSize.scaled(3 / 4));
 
                     let hit = collider.intersectSegment(start, delta, Vec2.ZERO);
 
@@ -637,6 +656,14 @@ export default class MainHW4Scene extends HW4Scene {
                     electricity.visible = false;
                 }
                 off.visible = false;
+            }
+        }
+
+        for (let moneybag of this.moneybags) {
+            if (moneybag.visible && this.player.collisionShape.overlaps(moneybag.boundary)) {
+                this.money += 50;
+                this.moneyLabel.text = `$: ${this.money}`;
+                moneybag.visible = false;
             }
         }
 
