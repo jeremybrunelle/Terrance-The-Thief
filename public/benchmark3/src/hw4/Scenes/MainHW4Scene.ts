@@ -38,6 +38,8 @@ import Electricity from "../GameSystems/ItemSystem/Items/Electricity";
 import Off from "../GameSystems/ItemSystem/Items/Off";
 import Switch from "../GameSystems/ItemSystem/Items/Switch";
 import Moneybag from "../GameSystems/ItemSystem/Items/Moneybag";
+import Decoy from "../GameSystems/ItemSystem/Items/Decoy";
+import Money from "../GameSystems/ItemSystem/Items/Money";
 import { ClosestPositioned } from "../GameSystems/Searching/HW4Reducers";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Position from "../GameSystems/Targeting/Position";
@@ -47,6 +49,7 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import NavigationPath from "../../Wolfie2D/Pathfinding/NavigationPath";
+import Input from "../../Wolfie2D/Input/Input";
 
 const BattlerGroups = {
     RED: 1,
@@ -83,6 +86,8 @@ export default class MainHW4Scene extends HW4Scene {
     private offs: Array<Off>;
     private switches: Array<Switch>;
     private moneybags: Array<Moneybag>;
+    private decoys: Array<Decoy>;
+    private moneys: Array<Money>;
 
     // The wall layer of the tilemap
     private walls: OrthogonalTilemap;
@@ -107,6 +112,8 @@ export default class MainHW4Scene extends HW4Scene {
         this.offs = new Array<Off>();
         this.switches = new Array<Switch>();
         this.moneybags = new Array<Moneybag>();
+        this.decoys = new Array<Decoy>();
+        this.moneys = new Array<Money>();
         this.guards = new Array<AnimatedSprite>();
     }
 
@@ -136,6 +143,7 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.object("switches", "hw4_assets/data/items/switches.json");
         this.load.object("offs", "hw4_assets/data/items/offs.json");
         this.load.object("moneybags", "hw4_assets/data/items/moneybags.json");
+        this.load.object("decoys", "hw4_assets/data/items/decoys.json");
 
         // Load the healthpack, inventory slot, and laser gun sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
@@ -150,6 +158,8 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.image("switch", "hw4_assets/sprites/switch.png");
         this.load.image("off", "hw4_assets/sprites/off.png");
         this.load.image("moneybag", "hw4_assets/sprites/moneybag.png");
+        this.load.image("decoy", "hw4_assets/sprites/decoy.png");
+        this.load.image("money", "hw4_assets/sprites/money.png");
     }
     /**
      * @see Scene.startScene
@@ -196,6 +206,7 @@ export default class MainHW4Scene extends HW4Scene {
      * @see Scene.updateScene
      */
     public override updateScene(deltaT: number): void {
+
         this.handleCollisions();
 
         for (let locker of this.lockers) {
@@ -210,6 +221,8 @@ export default class MainHW4Scene extends HW4Scene {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
+
+        this.useDecoy();
         this.inventoryHud.update(deltaT);
         this.playerHealthbar.update(deltaT);
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
@@ -344,8 +357,20 @@ export default class MainHW4Scene extends HW4Scene {
         Also, handled the player damage directly here as a temporary fix since the current damage
         handling doesn't work with an array of guards */
 
+        /* Added another change to check if the guard is distracted by a decoy, which can be used with
+        a mouse press */
+
         for (let i = 0; i < this.guards.length; i++) {
-            if (this.guards[i].position.distanceTo(this.player.position) < 50 && this.player.visible && this.isTargetVisible(this.player.position, this.guards[i].position)) {
+
+            let distracted = false;
+            for (let j = 0; j < this.moneys.length; j++) {
+                if (this.guards[i].position.distanceTo(this.moneys[j].position) < 25) {
+                    distracted = true
+                }
+            }
+
+            if (this.guards[i].position.distanceTo(this.player.position) < 50 && this.player.visible &&
+            this.isTargetVisible(this.player.position, this.guards[i].position) && !distracted) {
                 this.seenFlag = true;
                 this.player.health -= .02;
                 if (this.guards[i].position.x > this.player.position.x) {
@@ -458,6 +483,15 @@ export default class MainHW4Scene extends HW4Scene {
             this.moneybags[i].updateBoundary();
         }
 
+        let decoys = this.load.getObject("decoys");
+        this.decoys = new Array<Decoy>(decoys.items.length);
+        for (let i = 0; i < decoys.items.length; i++) {
+            let sprite = this.add.sprite("decoy", "primary");
+            this.decoys[i] = new Decoy(sprite);
+            this.decoys[i].position.set(decoys.items[i][0], decoys.items[i][1]);
+            this.decoys[i].updateBoundary();
+        }
+
     }
 
     initializeUI(): void {
@@ -547,6 +581,7 @@ export default class MainHW4Scene extends HW4Scene {
     public getElectricities(): Electricity[] { return this.electricities };
     public getOffs(): Off[] { return this.offs };
     public getMoneybags(): Moneybag[] { return this.moneybags };
+    public getDecoys(): Decoy[] { return this.decoys };
     public getBattlers(): Battler[] { return null };
 
     /**
@@ -615,7 +650,7 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let safe of this.safes) {
             if (safe.visible && this.player.collisionShape.overlaps(safe.boundary) && safe.unlooted) {
-                for (let item of this.player.inventory.inventory.values()) {
+                for (let item of this.player.inventory.items()) {
                     if (item instanceof Key) {
                         this.money += 100;
                         this.moneyLabel.text = `$: ${this.money}`;
@@ -667,5 +702,29 @@ export default class MainHW4Scene extends HW4Scene {
             }
         }
 
+        for (let decoy of this.decoys) {
+            if (decoy.visible && this.player.collisionShape.overlaps(decoy.boundary)) {
+                decoy.visible = false;
+                this.player.inventory.add(decoy);
+            }
+        }
+
     }
+
+    useDecoy() {
+        if (Input.isMouseJustPressed()) {
+            for (let item of this.player.inventory.items()) {
+                if (item instanceof Decoy) {
+                    let sprite = this.add.sprite("money", "primary");
+                    let money = new Money(sprite);
+                    money.position.set(this.player.position.x, this.player.position.y);
+                    money.updateBoundary();
+                    this.moneys.push(money);
+                    let key = item.id;
+                    this.player.inventory.remove(key);
+                }
+            }
+        }
+    }
+
 }
