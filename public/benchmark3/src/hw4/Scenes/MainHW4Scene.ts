@@ -50,11 +50,8 @@ import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import NavigationPath from "../../Wolfie2D/Pathfinding/NavigationPath";
 import Input from "../../Wolfie2D/Input/Input";
-
-const BattlerGroups = {
-    RED: 1,
-    BLUE: 2
-} as const;
+import AudioManager from "../../Wolfie2D/Sound/AudioManager";
+import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 
 export default class MainHW4Scene extends HW4Scene {
 
@@ -127,14 +124,10 @@ export default class MainHW4Scene extends HW4Scene {
         // Load the player and enemy spritesheets
         this.load.spritesheet("player1", "hw4_assets/spritesheets/player1.json");
 
-        // Load in the enemy sprites
-
         // Load the tilemap
         this.load.tilemap("level", "hw4_assets/tilemaps/HW4Tilemap.json");
 
-        // Load the enemy locations
-
-        // Load the healthpack and lasergun loactions
+        // Load the item loactions
         this.load.object("healthpacks", "hw4_assets/data/items/healthpacks.json");
         this.load.object("laserguns", "hw4_assets/data/items/laserguns.json");
         this.load.object("keys", "hw4_assets/data/items/keys.json");
@@ -148,7 +141,7 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.object("moneybags", "hw4_assets/data/items/moneybags.json");
         this.load.object("decoys", "hw4_assets/data/items/decoys.json");
 
-        // Load the healthpack, inventory slot, and laser gun sprites
+        // Load the sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
         this.load.image("inventorySlot", "hw4_assets/sprites/inventory.png");
         this.load.image("laserGun", "hw4_assets/sprites/laserGun.png");
@@ -163,6 +156,14 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.image("moneybag", "hw4_assets/sprites/moneybag.png");
         this.load.image("decoy", "hw4_assets/sprites/decoy.png");
         this.load.image("money", "hw4_assets/sprites/money.png");
+        
+
+        // Load the audios
+        this.load.audio("siren", "hw4_assets/audio/siren.mp3");
+        this.load.audio("money", "hw4_assets/audio/money.mp3");
+        this.load.audio("vent", "hw4_assets/audio/vent.mp3");
+        this.load.audio("locker", "hw4_assets/audio/locker.mp3");
+
     }
     /**
      * @see Scene.startScene
@@ -200,10 +201,6 @@ export default class MainHW4Scene extends HW4Scene {
         // Add a UI for health
         this.addUILayer("health");
 
-
-        this.receiver.subscribe(PlayerEvent.PLAYER_KILLED);
-        this.receiver.subscribe(BattlerEvent.BATTLER_KILLED);
-        this.receiver.subscribe(BattlerEvent.BATTLER_RESPAWN);
     }
     /**
      * @see Scene.updateScene
@@ -214,6 +211,9 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let locker of this.lockers) {
             if (locker.visible && this.player.collisionShape.overlaps(locker.boundary)) {
+                if (!this.player.visible) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "locker", loop: false, holdReference: true});
+                }
                 this.player.visible = false
             }
             else {
@@ -314,7 +314,6 @@ export default class MainHW4Scene extends HW4Scene {
     protected initializePlayer(): void {
         this.player = this.add.animatedSprite(PlayerActor, "player1", "primary");
         this.player.position.set(40, 40);
-        this.player.battleGroup = 2;
 
         this.player.health = 10;
         this.player.maxHealth = 10;
@@ -339,7 +338,6 @@ export default class MainHW4Scene extends HW4Scene {
         // Start the player in the "IDLE" animation
         this.player.animation.play("IDLE");
 
-        this.battlers.push(this.player);
         this.viewport.follow(this.player);
     }
     /**
@@ -373,9 +371,12 @@ export default class MainHW4Scene extends HW4Scene {
                     distracted = true
                 }
             }
-
-            if (this.guards[i].position.distanceTo(this.player.position) < 50 && this.player.visible &&
-            this.isTargetVisible(this.player.position, this.guards[i].position) && !distracted) {
+            
+            if (this.guards[i].position.distanceTo(this.player.position) < 5 && !distracted) {
+                this.player.health -= .02*this.multiplier;
+            }
+            else if (this.guards[i].position.distanceTo(this.player.position) < 50 && this.player.visible
+            && this.isTargetVisible(this.player.position, this.guards[i].position) && !distracted) {
                 this.seenFlag = true;
                 this.player.health -= .02*this.multiplier;
                 if (this.guards[i].position.x > this.player.position.x) {
@@ -647,6 +648,7 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let vent of this.vents) {
             if (vent.visible && this.player.collisionShape.overlaps(vent.boundary)) {
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "vent", loop: false, holdReference: true});
                 let random = Math.floor(Math.random() * this.vents.length);
                 let newPlayerPos: Vec2 = new Vec2(this.vents[random].position.x + 35, this.vents[random].position.y);
                 this.player.position = newPlayerPos;
@@ -657,6 +659,7 @@ export default class MainHW4Scene extends HW4Scene {
             if (safe.visible && this.player.collisionShape.overlaps(safe.boundary) && safe.unlooted) {
                 for (let item of this.player.inventory.items()) {
                     if (item instanceof Key) {
+                        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "money", loop: false, holdReference: true});
                         this.money += 100;
                         this.moneyLabel.text = `$: ${this.money}`;
                         let key = item.id;
@@ -669,6 +672,7 @@ export default class MainHW4Scene extends HW4Scene {
         for (let obstacle of this.obstacles) {
             if (obstacle.visible && this.player.collisionShape.overlaps(obstacle.boundary)) {
                 if (!this.spotted) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "siren", loop: false, holdReference: true});
                     //Player has been spotted, spawn more guards and make them stronger
                     this.spotted = true;
                     this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
