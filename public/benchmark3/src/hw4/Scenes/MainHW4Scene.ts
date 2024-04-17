@@ -70,6 +70,9 @@ export default class MainHW4Scene extends HW4Scene {
 
     private moneyLabel: Label;
     public money: number = 0;
+    private time: number = 0;
+    private spotted: boolean = false;
+    private multiplier: number = 1;
 
     private bases: BattlerBase[];
     private guards: Array<AnimatedSprite>;
@@ -206,7 +209,7 @@ export default class MainHW4Scene extends HW4Scene {
      * @see Scene.updateScene
      */
     public override updateScene(deltaT: number): void {
-
+        
         this.handleCollisions();
 
         for (let locker of this.lockers) {
@@ -223,6 +226,7 @@ export default class MainHW4Scene extends HW4Scene {
         }
 
         this.useDecoy();
+        this.moveSpotlight(this.time);
         this.inventoryHud.update(deltaT);
         this.playerHealthbar.update(deltaT);
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
@@ -235,6 +239,7 @@ export default class MainHW4Scene extends HW4Scene {
             }
             this.healthTimer++;
         }
+        this.time += 1;
     }
 
     /**
@@ -244,7 +249,7 @@ export default class MainHW4Scene extends HW4Scene {
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             case BattlerEvent.BATTLER_KILLED: {
-                this.handleBattlerKilled(event);
+                //this.handleBattlerKilled(event);
                 break;
             }
             case BattlerEvent.BATTLER_RESPAWN: {
@@ -274,7 +279,7 @@ export default class MainHW4Scene extends HW4Scene {
      * Handles an NPC being killed by unregistering the NPC from the scenes subsystems
      * @param event an NPC-killed event
      */
-    protected handleBattlerKilled(event: GameEvent): void {
+    /*protected handleBattlerKilled(event: GameEvent): void {
         let id: number = event.data.get("id");
         let battler = this.battlers.find(b => b.id === id);
 
@@ -283,7 +288,7 @@ export default class MainHW4Scene extends HW4Scene {
             this.healthbars.get(id).visible = false;
         }
         
-    }
+    }*/
 
     protected handlePlayerKilled(): void {
         if (this.player.health <= 0) {
@@ -372,16 +377,16 @@ export default class MainHW4Scene extends HW4Scene {
             if (this.guards[i].position.distanceTo(this.player.position) < 50 && this.player.visible &&
             this.isTargetVisible(this.player.position, this.guards[i].position) && !distracted) {
                 this.seenFlag = true;
-                this.player.health -= .02;
+                this.player.health -= .02*this.multiplier;
                 if (this.guards[i].position.x > this.player.position.x) {
-                    this.guards[i].position.x -= .7;
+                    this.guards[i].position.x -= .7*this.multiplier;
                 }else{
-                    this.guards[i].position.x += .7;
+                    this.guards[i].position.x += .7*this.multiplier;
                 }
                 if (this.guards[i].position.y > this.player.position.y) {
-                    this.guards[i].position.y -= .7;
+                    this.guards[i].position.y -= .7*this.multiplier;
                 }else{
-                    this.guards[i].position.y += .7;
+                    this.guards[i].position.y += .7*this.multiplier;
                 }
             }else{
                 this.seenFlag = false;
@@ -663,7 +668,18 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let obstacle of this.obstacles) {
             if (obstacle.visible && this.player.collisionShape.overlaps(obstacle.boundary)) {
-                this.player.health -= .1;
+                if (!this.spotted) {
+                    //Player has been spotted, spawn more guards and make them stronger
+                    this.spotted = true;
+                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+                    this.guards[3].position.set(100, 200);
+                    this.guards[4].position.set(300, 300);
+                    this.guards[5].position.set(100, 450);
+                    //Set the multiplier to 2, guards now twice as fast and do twice as much damage
+                    this.multiplier = 2;
+                }
             }
         }
 
@@ -724,6 +740,18 @@ export default class MainHW4Scene extends HW4Scene {
                     this.player.inventory.remove(key);
                 }
             }
+        }
+    }
+
+    moveSpotlight(time: number) {
+        for (let i = 0; i < this.obstacles.length; i++) {
+            if (time % 400 > 199) {
+                this.obstacles[i].position.y += .5;
+            }
+            else {
+                this.obstacles[i].position.y -= .5;
+            }
+            this.obstacles[i].updateBoundary();
         }
     }
 

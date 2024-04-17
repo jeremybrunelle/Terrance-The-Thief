@@ -15,7 +15,7 @@ export default class Obstacle extends Item {
 
     updateBoundary(): void {
 		this.boundary.center.set(this.position.x, this.position.y);
-		this.boundary.halfSize.set(10, 10);
+		this.boundary.halfSize.set(32, 32);
 	}
 
 }
