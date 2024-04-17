@@ -211,7 +211,7 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let locker of this.lockers) {
             if (locker.visible && this.player.collisionShape.overlaps(locker.boundary)) {
-                if (!this.player.visible) {
+                if (this.player.visible) {
                     this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "locker", loop: false, holdReference: true});
                 }
                 this.player.visible = false
