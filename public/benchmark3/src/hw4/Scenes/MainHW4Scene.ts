@@ -52,6 +52,7 @@ import NavigationPath from "../../Wolfie2D/Pathfinding/NavigationPath";
 import Input from "../../Wolfie2D/Input/Input";
 import AudioManager from "../../Wolfie2D/Sound/AudioManager";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
+import Graphic from "../../Wolfie2D/Nodes/Graphic";
 
 export default class MainHW4Scene extends HW4Scene {
 
@@ -71,6 +72,7 @@ export default class MainHW4Scene extends HW4Scene {
     private spotted: boolean = false;
     private multiplier: number = 1;
 
+    private lasers: Array<Graphic>;
     private bases: BattlerBase[];
     private guards: Array<AnimatedSprite>;
     private seenFlag: boolean = false;
@@ -98,6 +100,7 @@ export default class MainHW4Scene extends HW4Scene {
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
 
+        this.lasers = new Array<Graphic>();
         this.battlers = new Array<Battler & Actor>();
         this.healthbars = new Map<number, HealthbarHUD>();
         this.healthTimer = 0;
@@ -161,8 +164,9 @@ export default class MainHW4Scene extends HW4Scene {
         // Load the audios
         this.load.audio("siren", "hw4_assets/audio/siren.mp3");
         this.load.audio("money", "hw4_assets/audio/money.mp3");
-        this.load.audio("vent", "hw4_assets/audio/vent.mp3");
         this.load.audio("locker", "hw4_assets/audio/locker.mp3");
+        this.load.audio("shoot", "hw4_assets/audio/shoot.mp3");
+        this.load.audio("electricity", "hw4_assets/audio/electricity.mp3");
 
     }
     /**
@@ -230,6 +234,10 @@ export default class MainHW4Scene extends HW4Scene {
         this.inventoryHud.update(deltaT);
         this.playerHealthbar.update(deltaT);
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
+        for (let i = 0; i < this.lasers.length; i++) {
+            let line = new Line(Vec2.ZERO, Vec2.ZERO);
+            this.lasers[i] = line;
+        }
         this.enterChase();
         this.handlePlayerKilled();
         if(this.seenFlag){
@@ -374,11 +382,23 @@ export default class MainHW4Scene extends HW4Scene {
             
             if (this.guards[i].position.distanceTo(this.player.position) < 5 && !distracted) {
                 this.player.health -= .02*this.multiplier;
+                let xpos = this.player.position.x;
+                let ypos = this.player.position.y;
+                //this.lasers[i] = this.add.graphic(GraphicType.LINE, "primary", {start: this.player.position, end: this.guards[i].position}); 
+                if (this.time % 20 > 18) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "shoot", loop: false, holdReference: true});
+                }
             }
             else if (this.guards[i].position.distanceTo(this.player.position) < 50 && this.player.visible
             && this.isTargetVisible(this.player.position, this.guards[i].position) && !distracted) {
                 this.seenFlag = true;
                 this.player.health -= .02*this.multiplier;
+                let xpos = this.player.position.x;
+                let ypos = this.player.position.y;
+                //this.lasers[i] = this.add.graphic(GraphicType.LINE, "primary", {start: this.player.position, end: this.guards[i].position});
+                if (this.time % 20 > 18) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "shoot", loop: false, holdReference: true});
+                }
                 if (this.guards[i].position.x > this.player.position.x) {
                     this.guards[i].position.x -= .7*this.multiplier;
                 }else{
@@ -392,6 +412,7 @@ export default class MainHW4Scene extends HW4Scene {
             }else{
                 this.seenFlag = false;
             }
+            
         }    
     }
 
@@ -496,6 +517,12 @@ export default class MainHW4Scene extends HW4Scene {
             this.decoys[i] = new Decoy(sprite);
             this.decoys[i].position.set(decoys.items[i][0], decoys.items[i][1]);
             this.decoys[i].updateBoundary();
+        }
+
+        this.lasers = new Array<Line>(6);
+        for (let i = 0; i < this.lasers.length; i++) {
+            let line = new Line(Vec2.ZERO, Vec2.ZERO);
+            this.lasers[i] = line;
         }
 
     }
@@ -648,7 +675,7 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let vent of this.vents) {
             if (vent.visible && this.player.collisionShape.overlaps(vent.boundary)) {
-                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "vent", loop: false, holdReference: true});
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "locker", loop: false, holdReference: true});
                 let random = Math.floor(Math.random() * this.vents.length);
                 let newPlayerPos: Vec2 = new Vec2(this.vents[random].position.x + 35, this.vents[random].position.y);
                 this.player.position = newPlayerPos;
@@ -701,7 +728,8 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let electricity of this.electricities) {
             if (electricity.visible && this.player.collisionShape.overlaps(electricity.boundary)) {
-                this.player.health = 0;
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "electricity", loop: false, holdReference: true});
+                this.player.health -= 1;
             }
         }
 
@@ -717,6 +745,7 @@ export default class MainHW4Scene extends HW4Scene {
         for (let moneybag of this.moneybags) {
             if (moneybag.visible && this.player.collisionShape.overlaps(moneybag.boundary)) {
                 this.money += 50;
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "money", loop: false, holdReference: true});
                 this.moneyLabel.text = `$: ${this.money}`;
                 moneybag.visible = false;
             }
