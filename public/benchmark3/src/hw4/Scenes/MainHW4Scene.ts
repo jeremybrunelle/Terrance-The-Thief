@@ -231,6 +231,7 @@ export default class MainHW4Scene extends HW4Scene {
 
         this.useDecoy();
         this.moveSpotlight(this.time);
+        this.moveGuards(this.time);
         this.inventoryHud.update(deltaT);
         this.playerHealthbar.update(deltaT);
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
@@ -356,8 +357,8 @@ export default class MainHW4Scene extends HW4Scene {
         this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
         this.guards[0].position.set(100, 100);
-        this.guards[1].position.set(300, 100);
-        this.guards[2].position.set(100, 300);
+        this.guards[1].position.set(280, 150);
+        this.guards[2].position.set(100, 260);
 
     }
     protected enterChase(): void {
@@ -379,11 +380,13 @@ export default class MainHW4Scene extends HW4Scene {
                     distracted = true
                 }
             }
-            
+        
             if (this.guards[i].position.distanceTo(this.player.position) < 5 && !distracted) {
                 this.player.health -= .02*this.multiplier;
+                this.guards[i].alpha = .99;
                 let xpos = this.player.position.x;
                 let ypos = this.player.position.y;
+                //this.lasers[i] = new Line(this.player.position, this.guards[i].position);
                 //this.lasers[i] = this.add.graphic(GraphicType.LINE, "primary", {start: this.player.position, end: this.guards[i].position}); 
                 if (this.time % 20 > 18) {
                     this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "shoot", loop: false, holdReference: true});
@@ -393,8 +396,10 @@ export default class MainHW4Scene extends HW4Scene {
             && this.isTargetVisible(this.player.position, this.guards[i].position) && !distracted) {
                 this.seenFlag = true;
                 this.player.health -= .02*this.multiplier;
+                this.guards[i].alpha = .99;
                 let xpos = this.player.position.x;
                 let ypos = this.player.position.y;
+                //this.lasers[i] = new Line(this.player.position, this.guards[i].position);
                 //this.lasers[i] = this.add.graphic(GraphicType.LINE, "primary", {start: this.player.position, end: this.guards[i].position});
                 if (this.time % 20 > 18) {
                     this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "shoot", loop: false, holdReference: true});
@@ -705,9 +710,9 @@ export default class MainHW4Scene extends HW4Scene {
                     this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
                     this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
                     this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards[3].position.set(100, 200);
-                    this.guards[4].position.set(300, 300);
-                    this.guards[5].position.set(100, 450);
+                    this.guards[3].position.set(250, 250);
+                    this.guards[4].position.set(300, 350);
+                    this.guards[5].position.set(350, 100);
                     //Set the multiplier to 2, guards now twice as fast and do twice as much damage
                     this.multiplier = 2;
                 }
@@ -785,6 +790,59 @@ export default class MainHW4Scene extends HW4Scene {
                 this.obstacles[i].position.y -= .5;
             }
             this.obstacles[i].updateBoundary();
+        }
+    }
+
+    moveGuards(time: number) {
+        for (let i = 0; i < this.guards.length; i++) {
+            if (i == 0 && this.guards[0].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[0].position.x += .4;
+                }
+                else {
+                    this.guards[0].position.x -= .4;
+                } 
+            }
+            if (i == 1 && this.guards[1].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[1].position.y += .5;
+                }
+                else {
+                    this.guards[1].position.y -= .5;
+                } 
+            }
+            if (i == 2 && this.guards[2].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[2].position.y -= .5;
+                }
+                else {
+                    this.guards[2].position.y += .5;
+                } 
+            }
+            if (i == 3 && this.guards[3].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[3].position.y += .5;
+                }
+                else {
+                    this.guards[3].position.y -= .5;
+                } 
+            }
+            if (i == 4 && this.guards[4].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[4].position.y += .5;
+                }
+                else {
+                    this.guards[4].position.y -= .5;
+                } 
+            }
+            if (i == 5 && this.guards[5].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[5].position.y += .5;
+                }
+                else {
+                    this.guards[5].position.y -= .5;
+                } 
+            }
         }
     }
 
