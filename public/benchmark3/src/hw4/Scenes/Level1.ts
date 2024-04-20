@@ -4,7 +4,7 @@ import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import GameNode from "../../Wolfie2D/Nodes/GameNode";
-import GameOver from "../Scenes/GameOver"
+import GameOver from "./GameOver"
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Line from "../../Wolfie2D/Nodes/Graphics/Line";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
@@ -53,8 +53,10 @@ import Input from "../../Wolfie2D/Input/Input";
 import AudioManager from "../../Wolfie2D/Sound/AudioManager";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Graphic from "../../Wolfie2D/Nodes/Graphic";
+import MainMenu from "./MainMenu";
+import Level2 from "./Level2";
 
-export default class MainHW4Scene extends HW4Scene {
+export default class Level1 extends HW4Scene {
 
     /** GameSystems in the HW4 Scene */
     private inventoryHud: InventoryHUD;
@@ -131,23 +133,21 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.tilemap("level", "hw4_assets/tilemaps/HW4Tilemap.json");
 
         // Load the item loactions
-        this.load.object("healthpacks", "hw4_assets/data/items/healthpacks.json");
-        this.load.object("laserguns", "hw4_assets/data/items/laserguns.json");
-        this.load.object("keys", "hw4_assets/data/items/keys.json");
-        this.load.object("vents", "hw4_assets/data/items/vents.json");
-        this.load.object("safes", "hw4_assets/data/items/safes.json");
-        this.load.object("obstacles", "hw4_assets/data/items/obstacles.json");
-        this.load.object("lockers", "hw4_assets/data/items/lockers.json");
-        this.load.object("electricities", "hw4_assets/data/items/electricities.json");
-        this.load.object("switches", "hw4_assets/data/items/switches.json");
-        this.load.object("offs", "hw4_assets/data/items/offs.json");
-        this.load.object("moneybags", "hw4_assets/data/items/moneybags.json");
-        this.load.object("decoys", "hw4_assets/data/items/decoys.json");
+        this.load.object("healthpacks", "hw4_assets/data/items/level1healthpacks.json");
+        this.load.object("keys", "hw4_assets/data/items/level1keys.json");
+        this.load.object("vents", "hw4_assets/data/items/level1vents.json");
+        this.load.object("safes", "hw4_assets/data/items/level1safes.json");
+        this.load.object("obstacles", "hw4_assets/data/items/level1obstacles.json");
+        this.load.object("lockers", "hw4_assets/data/items/level1lockers.json");
+        this.load.object("electricities", "hw4_assets/data/items/level1electricities.json");
+        this.load.object("switches", "hw4_assets/data/items/level1switches.json");
+        this.load.object("offs", "hw4_assets/data/items/level1offs.json");
+        this.load.object("moneybags", "hw4_assets/data/items/level1moneybags.json");
+        this.load.object("decoys", "hw4_assets/data/items/level1decoys.json");
 
         // Load the sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
         this.load.image("inventorySlot", "hw4_assets/sprites/inventory.png");
-        this.load.image("laserGun", "hw4_assets/sprites/laserGun.png");
         this.load.image("key", "hw4_assets/sprites/key.png");
         this.load.image("vent", "hw4_assets/sprites/vent.png");
         this.load.image("safe", "hw4_assets/sprites/safe.png");
@@ -240,6 +240,7 @@ export default class MainHW4Scene extends HW4Scene {
             this.lasers[i] = line;
         }
         this.enterChase();
+        this.levelCompleteCheck();
         this.handlePlayerKilled();
         if(this.seenFlag){
             if(this.healthTimer == 15){
@@ -694,6 +695,7 @@ export default class MainHW4Scene extends HW4Scene {
                         this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "money", loop: false, holdReference: true});
                         this.money += 100;
                         this.moneyLabel.text = `$: ${this.money}`;
+                        safe.unlooted = false;
                         let key = item.id;
                         this.player.inventory.remove(key);
                     }
@@ -842,6 +844,20 @@ export default class MainHW4Scene extends HW4Scene {
                 else {
                     this.guards[5].position.y -= .5;
                 } 
+            }
+        }
+    }
+
+    levelCompleteCheck() {
+        let levelComplete = true;
+        if (this.money >= 250) {
+            for (let safe of this.safes) {
+                if (safe.unlooted) {
+                    levelComplete = false;
+                }
+            }
+            if (levelComplete) {
+                this.sceneManager.changeToScene(Level2);
             }
         }
     }
