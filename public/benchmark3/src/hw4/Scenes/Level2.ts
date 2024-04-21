@@ -130,7 +130,7 @@ export default class Level2 extends HW4Scene {
         this.load.spritesheet("player1", "hw4_assets/spritesheets/player1.json");
 
         // Load the tilemap
-        this.load.tilemap("level", "hw4_assets/tilemaps/HW4Tilemap.json");
+        this.load.tilemap("level", "hw4_assets/tilemaps/level2tilemap.json");
 
         // Load the item loactions
         this.load.object("healthpacks", "hw4_assets/data/items/level2healthpacks.json");
