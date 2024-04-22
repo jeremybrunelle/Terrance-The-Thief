@@ -59,6 +59,7 @@ import Level1 from "./Level1";
 import Level4 from "./Level4";
 import Level5 from "./Level5";
 import Level6 from "./Level6";
+import Level2Complete from "./Level2Complete";
 
 export default class Level2 extends HW4Scene {
 
@@ -865,7 +866,7 @@ export default class Level2 extends HW4Scene {
                 }
             }
             if (levelComplete) {
-                this.sceneManager.changeToScene(Level3);
+                this.sceneManager.changeToScene(Level2Complete);
             }
         }
     }
