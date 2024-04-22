@@ -47,6 +47,7 @@ import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import NavigationPath from "../../Wolfie2D/Pathfinding/NavigationPath";
 
+
 const BattlerGroups = {
     RED: 1,
     BLUE: 2
@@ -81,6 +82,7 @@ export default class MainHW4Scene extends HW4Scene {
     private electricities: Array<Electricity>;
     private offs: Array<Off>;
     private switches: Array<Switch>;
+    private activityTimer: Timer;
 
     // The wall layer of the tilemap
     private walls: OrthogonalTilemap;
@@ -104,6 +106,7 @@ export default class MainHW4Scene extends HW4Scene {
         this.electricities = new Array<Electricity>();
         this.offs = new Array<Off>();
         this.switches = new Array<Switch>();
+        this.activityTimer = new Timer(10000);
     }
 
     /**
@@ -185,6 +188,7 @@ export default class MainHW4Scene extends HW4Scene {
         this.receiver.subscribe(PlayerEvent.PLAYER_KILLED);
         this.receiver.subscribe(BattlerEvent.BATTLER_KILLED);
         this.receiver.subscribe(BattlerEvent.BATTLER_RESPAWN);
+        
     }
     /**
      * @see Scene.updateScene
@@ -270,6 +274,15 @@ export default class MainHW4Scene extends HW4Scene {
         if (this.player.health <= 0) {
             this.sceneManager.changeToScene(GameOver);
         }
+    }
+
+    protected handlePuzzleInteract(): void {
+        if (this.activityTimer.isStopped()) {
+            this.activityTimer.start();
+        } else{
+            
+        }
+
     }
 
     /** Initializes the layers in the scene */
