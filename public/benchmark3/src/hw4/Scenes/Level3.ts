@@ -54,7 +54,11 @@ import AudioManager from "../../Wolfie2D/Sound/AudioManager";
 import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
 import Graphic from "../../Wolfie2D/Nodes/Graphic";
 import MainMenu from "./MainMenu";
+import Level1 from "./Level1";
+import Level2 from "./Level2";
 import Level4 from "./Level4";
+import Level5 from "./Level5";
+import Level6 from "./Level6";
 
 export default class Level3 extends HW4Scene {
 
@@ -242,9 +246,10 @@ export default class Level3 extends HW4Scene {
         }
         this.enterChase();
         this.levelCompleteCheck();
+        this.cheatCodeCheck();
         this.handlePlayerKilled();
         if(this.seenFlag){
-            if(this.healthTimer == 15){
+            if(this.healthTimer == 15 && this.player.alpha != .5){
             this.player.health -= .25;
             this.healthTimer = 0;
             }
@@ -383,7 +388,7 @@ export default class Level3 extends HW4Scene {
                 }
             }
         
-            if (this.guards[i].position.distanceTo(this.player.position) < 5 && !distracted) {
+            if (this.guards[i].position.distanceTo(this.player.position) < 5 && !distracted && this.player.alpha != .5) {
                 this.player.health -= .02*this.multiplier;
                 this.guards[i].alpha = .99;
                 let xpos = this.player.position.x;
@@ -397,7 +402,9 @@ export default class Level3 extends HW4Scene {
             else if (this.guards[i].position.distanceTo(this.player.position) < 50 && this.player.visible
             && this.isTargetVisible(this.player.position, this.guards[i].position) && !distracted) {
                 this.seenFlag = true;
-                this.player.health -= .02*this.multiplier;
+                if (this.player.alpha != .5) {
+                    this.player.health -= .02*this.multiplier;
+                }
                 this.guards[i].alpha = .99;
                 let xpos = this.player.position.x;
                 let ypos = this.player.position.y;
@@ -735,7 +742,7 @@ export default class Level3 extends HW4Scene {
         }
 
         for (let electricity of this.electricities) {
-            if (electricity.visible && this.player.collisionShape.overlaps(electricity.boundary)) {
+            if (electricity.visible && this.player.collisionShape.overlaps(electricity.boundary) && this.player.alpha != .5) {
                 this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "electricity", loop: false, holdReference: true});
                 this.player.health -= 1;
             }
@@ -859,6 +866,36 @@ export default class Level3 extends HW4Scene {
             }
             if (levelComplete) {
                 this.sceneManager.changeToScene(Level4);
+            }
+        }
+    }
+
+    cheatCodeCheck() {
+        
+        if (Input.isJustPressed("1")) {
+            this.sceneManager.changeToScene(Level1);
+        }
+        if (Input.isJustPressed("2")) {
+            this.sceneManager.changeToScene(Level2);
+        }
+        if (Input.isJustPressed("3")) {
+            this.sceneManager.changeToScene(Level3);
+        }
+        if (Input.isJustPressed("4")) {
+            this.sceneManager.changeToScene(Level4);
+        }
+        if (Input.isJustPressed("5")) {
+            this.sceneManager.changeToScene(Level5);
+        }
+        if (Input.isJustPressed("6")) {
+            this.sceneManager.changeToScene(Level6);
+        }
+        if (Input.isJustPressed("7")) {
+            if (this.player.alpha != .5) {
+                this.player.alpha = .5;
+            }
+            else {
+                this.player.alpha = 1;
             }
         }
     }
