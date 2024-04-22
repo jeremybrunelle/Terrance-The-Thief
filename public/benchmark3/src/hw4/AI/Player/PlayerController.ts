@@ -24,8 +24,11 @@ export default class PlayerController {
     /** The GameNode that owns the AI */
     protected owner: AnimatedSprite;
 
+    protected loudness: number;
+
     constructor(owner: AnimatedSprite) {
         this.owner = owner;
+        this.loudness=0;
     }
 
     /**
@@ -70,5 +73,9 @@ export default class PlayerController {
      * @return true if the player is attempting to drop their held item; false otherwise.
      */
     public get dropping(): boolean { return Input.isJustPressed(PlayerInput.DROP_ITEM); }
+
+    public get loudnessLevel(): number { return this.loudness; }
+
+    public updateLoudness(loudness: number) { this.loudness = loudness; }
 
 }

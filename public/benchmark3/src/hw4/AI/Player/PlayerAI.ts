@@ -54,6 +54,7 @@ export default class PlayerAI extends StateMachineAI implements AI {
                 this.handleLaserFiredEvent(event.data.get("actorId"), event.data.get("to"), event.data.get("from"));
                 break;
             }
+            
             default: {
                 super.handleEvent(event);
                 break;
@@ -67,6 +68,14 @@ export default class PlayerAI extends StateMachineAI implements AI {
                 this.owner.health -= 1;
             }
         }
+    }
+
+    protected handleIncreaseLoudnessEvent(loudness: number): void {
+        this.controller.updateLoudness(this.controller.loudnessLevel + loudness);
+    }
+
+    protected handleDecreaseLoudnessEvent(loudness: number): void {
+        this.controller.updateLoudness(this.controller.loudnessLevel - loudness);
     }
 
 
