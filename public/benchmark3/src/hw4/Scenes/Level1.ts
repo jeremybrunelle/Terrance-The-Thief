@@ -4,7 +4,7 @@ import AABB from "../../Wolfie2D/DataTypes/Shapes/AABB";
 import Vec2 from "../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
 import GameNode from "../../Wolfie2D/Nodes/GameNode";
-import GameOver from "../Scenes/GameOver"
+import GameOver from "./GameOver"
 import { GraphicType } from "../../Wolfie2D/Nodes/Graphics/GraphicTypes";
 import Line from "../../Wolfie2D/Nodes/Graphics/Line";
 import OrthogonalTilemap from "../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
@@ -37,6 +37,9 @@ import Locker from "../GameSystems/ItemSystem/Items/Locker";
 import Electricity from "../GameSystems/ItemSystem/Items/Electricity";
 import Off from "../GameSystems/ItemSystem/Items/Off";
 import Switch from "../GameSystems/ItemSystem/Items/Switch";
+import Moneybag from "../GameSystems/ItemSystem/Items/Moneybag";
+import Decoy from "../GameSystems/ItemSystem/Items/Decoy";
+import Money from "../GameSystems/ItemSystem/Items/Money";
 import { ClosestPositioned } from "../GameSystems/Searching/HW4Reducers";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Position from "../GameSystems/Targeting/Position";
@@ -46,13 +49,19 @@ import AnimatedSprite from "../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import Label from "../../Wolfie2D/Nodes/UIElements/Label";
 import { UIElementType } from "../../Wolfie2D/Nodes/UIElements/UIElementTypes";
 import NavigationPath from "../../Wolfie2D/Pathfinding/NavigationPath";
+import Input from "../../Wolfie2D/Input/Input";
+import AudioManager from "../../Wolfie2D/Sound/AudioManager";
+import { GameEventType } from "../../Wolfie2D/Events/GameEventType";
+import Graphic from "../../Wolfie2D/Nodes/Graphic";
+import MainMenu from "./MainMenu";
+import Level2 from "./Level2";
+import Level3 from "./Level3";
+import Level4 from "./Level4";
+import Level5 from "./Level5";
+import Level6 from "./Level6";
+import Level1Complete from "./Level1Complete";
 
-const BattlerGroups = {
-    RED: 1,
-    BLUE: 2
-} as const;
-
-export default class MainHW4Scene extends HW4Scene {
+export default class Level1 extends HW4Scene {
 
     /** GameSystems in the HW4 Scene */
     private inventoryHud: InventoryHUD;
@@ -66,9 +75,13 @@ export default class MainHW4Scene extends HW4Scene {
 
     private moneyLabel: Label;
     public money: number = 0;
+    private time: number = 0;
+    private spotted: boolean = false;
+    private multiplier: number = 1;
 
+    private lasers: Array<Graphic>;
     private bases: BattlerBase[];
-    private guards;
+    private guards: Array<AnimatedSprite>;
     private seenFlag: boolean = false;
     private healthTimer: number;
     private healthpacks: Array<Healthpack>;
@@ -81,6 +94,9 @@ export default class MainHW4Scene extends HW4Scene {
     private electricities: Array<Electricity>;
     private offs: Array<Off>;
     private switches: Array<Switch>;
+    private moneybags: Array<Moneybag>;
+    private decoys: Array<Decoy>;
+    private moneys: Array<Money>;
 
     // The wall layer of the tilemap
     private walls: OrthogonalTilemap;
@@ -91,6 +107,7 @@ export default class MainHW4Scene extends HW4Scene {
     public constructor(viewport: Viewport, sceneManager: SceneManager, renderingManager: RenderingManager, options: Record<string, any>) {
         super(viewport, sceneManager, renderingManager, options);
 
+        this.lasers = new Array<Graphic>();
         this.battlers = new Array<Battler & Actor>();
         this.healthbars = new Map<number, HealthbarHUD>();
         this.healthTimer = 0;
@@ -104,6 +121,10 @@ export default class MainHW4Scene extends HW4Scene {
         this.electricities = new Array<Electricity>();
         this.offs = new Array<Off>();
         this.switches = new Array<Switch>();
+        this.moneybags = new Array<Moneybag>();
+        this.decoys = new Array<Decoy>();
+        this.moneys = new Array<Money>();
+        this.guards = new Array<AnimatedSprite>();
     }
 
     /**
@@ -113,30 +134,25 @@ export default class MainHW4Scene extends HW4Scene {
         // Load the player and enemy spritesheets
         this.load.spritesheet("player1", "hw4_assets/spritesheets/player1.json");
 
-        // Load in the enemy sprites
-        this.load.spritesheet("guard", "hw4_assets/spritesheets/GUARD.json");
-        
         // Load the tilemap
         this.load.tilemap("level", "hw4_assets/tilemaps/HW4Tilemap.json");
 
-        // Load the enemy locations
+        // Load the item loactions
+        this.load.object("healthpacks", "hw4_assets/data/items/level1healthpacks.json");
+        this.load.object("keys", "hw4_assets/data/items/level1keys.json");
+        this.load.object("vents", "hw4_assets/data/items/level1vents.json");
+        this.load.object("safes", "hw4_assets/data/items/level1safes.json");
+        this.load.object("obstacles", "hw4_assets/data/items/level1obstacles.json");
+        this.load.object("lockers", "hw4_assets/data/items/level1lockers.json");
+        this.load.object("electricities", "hw4_assets/data/items/level1electricities.json");
+        this.load.object("switches", "hw4_assets/data/items/level1switches.json");
+        this.load.object("offs", "hw4_assets/data/items/level1offs.json");
+        this.load.object("moneybags", "hw4_assets/data/items/level1moneybags.json");
+        this.load.object("decoys", "hw4_assets/data/items/level1decoys.json");
 
-        // Load the healthpack and lasergun loactions
-        this.load.object("healthpacks", "hw4_assets/data/items/healthpacks.json");
-        this.load.object("laserguns", "hw4_assets/data/items/laserguns.json");
-        this.load.object("keys", "hw4_assets/data/items/keys.json");
-        this.load.object("vents", "hw4_assets/data/items/vents.json");
-        this.load.object("safes", "hw4_assets/data/items/safes.json");
-        this.load.object("obstacles", "hw4_assets/data/items/obstacles.json");
-        this.load.object("lockers", "hw4_assets/data/items/lockers.json");
-        this.load.object("electricities", "hw4_assets/data/items/electricities.json");
-        this.load.object("switches", "hw4_assets/data/items/switches.json");
-        this.load.object("offs", "hw4_assets/data/items/offs.json");
-
-        // Load the healthpack, inventory slot, and laser gun sprites
+        // Load the sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
         this.load.image("inventorySlot", "hw4_assets/sprites/inventory.png");
-        this.load.image("laserGun", "hw4_assets/sprites/laserGun.png");
         this.load.image("key", "hw4_assets/sprites/key.png");
         this.load.image("vent", "hw4_assets/sprites/vent.png");
         this.load.image("safe", "hw4_assets/sprites/safe.png");
@@ -145,6 +161,18 @@ export default class MainHW4Scene extends HW4Scene {
         this.load.image("electricity", "hw4_assets/sprites/electricity.png");
         this.load.image("switch", "hw4_assets/sprites/switch.png");
         this.load.image("off", "hw4_assets/sprites/off.png");
+        this.load.image("moneybag", "hw4_assets/sprites/moneybag.png");
+        this.load.image("decoy", "hw4_assets/sprites/decoy.png");
+        this.load.image("money", "hw4_assets/sprites/money.png");
+        
+
+        // Load the audios
+        this.load.audio("siren", "hw4_assets/audio/siren.mp3");
+        this.load.audio("money", "hw4_assets/audio/money.mp3");
+        this.load.audio("locker", "hw4_assets/audio/locker.mp3");
+        this.load.audio("shoot", "hw4_assets/audio/shoot.mp3");
+        this.load.audio("electricity", "hw4_assets/audio/electricity.mp3");
+
     }
     /**
      * @see Scene.startScene
@@ -182,19 +210,19 @@ export default class MainHW4Scene extends HW4Scene {
         // Add a UI for health
         this.addUILayer("health");
 
-
-        this.receiver.subscribe(PlayerEvent.PLAYER_KILLED);
-        this.receiver.subscribe(BattlerEvent.BATTLER_KILLED);
-        this.receiver.subscribe(BattlerEvent.BATTLER_RESPAWN);
     }
     /**
      * @see Scene.updateScene
      */
     public override updateScene(deltaT: number): void {
+        
         this.handleCollisions();
 
         for (let locker of this.lockers) {
             if (locker.visible && this.player.collisionShape.overlaps(locker.boundary)) {
+                if (this.player.visible) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "locker", loop: false, holdReference: true});
+                }
                 this.player.visible = false
             }
             else {
@@ -205,18 +233,29 @@ export default class MainHW4Scene extends HW4Scene {
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-        this.handlePlayerKilled()
+
+        this.useDecoy();
+        this.moveSpotlight(this.time);
+        this.moveGuards(this.time);
         this.inventoryHud.update(deltaT);
         this.playerHealthbar.update(deltaT);
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
+        for (let i = 0; i < this.lasers.length; i++) {
+            let line = new Line(Vec2.ZERO, Vec2.ZERO);
+            this.lasers[i] = line;
+        }
         this.enterChase();
+        this.levelCompleteCheck();
+        this.cheatCodeCheck();
+        this.handlePlayerKilled();
         if(this.seenFlag){
-            if(this.healthTimer == 15){
+            if(this.healthTimer == 15 && this.player.alpha != .5){
             this.player.health -= .25;
             this.healthTimer = 0;
             }
             this.healthTimer++;
         }
+        this.time += 1;
     }
 
     /**
@@ -226,7 +265,7 @@ export default class MainHW4Scene extends HW4Scene {
     public handleEvent(event: GameEvent): void {
         switch (event.type) {
             case BattlerEvent.BATTLER_KILLED: {
-                this.handleBattlerKilled(event);
+                //this.handleBattlerKilled(event);
                 break;
             }
             case BattlerEvent.BATTLER_RESPAWN: {
@@ -256,7 +295,7 @@ export default class MainHW4Scene extends HW4Scene {
      * Handles an NPC being killed by unregistering the NPC from the scenes subsystems
      * @param event an NPC-killed event
      */
-    protected handleBattlerKilled(event: GameEvent): void {
+    /*protected handleBattlerKilled(event: GameEvent): void {
         let id: number = event.data.get("id");
         let battler = this.battlers.find(b => b.id === id);
 
@@ -265,7 +304,7 @@ export default class MainHW4Scene extends HW4Scene {
             this.healthbars.get(id).visible = false;
         }
         
-    }
+    }*/
 
     protected handlePlayerKilled(): void {
         if (this.player.health <= 0) {
@@ -291,7 +330,6 @@ export default class MainHW4Scene extends HW4Scene {
     protected initializePlayer(): void {
         this.player = this.add.animatedSprite(PlayerActor, "player1", "primary");
         this.player.position.set(40, 40);
-        this.player.battleGroup = 2;
 
         this.player.health = 10;
         this.player.maxHealth = 10;
@@ -316,37 +354,82 @@ export default class MainHW4Scene extends HW4Scene {
         // Start the player in the "IDLE" animation
         this.player.animation.play("IDLE");
 
-        this.battlers.push(this.player);
         this.viewport.follow(this.player);
     }
     /**
      * Initialize the NPCs 
      */
     protected initializeNPCs(): void {
-        this.guards= this.add.animatedSprite(NPCActor, "player1", "primary");
-        this.guards.position.set(100, 100);
+        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+        this.guards[0].position.set(100, 100);
+        this.guards[1].position.set(280, 150);
+        this.guards[2].position.set(100, 260);
 
     }
     protected enterChase(): void {
 
-        if (this.guards.position.distanceTo(this.player.position) < 50) {
-            this.seenFlag = true;
-            if (this.guards.position.x > this.player.position.x) {
-                this.guards.position.x -= .2;
-            }else{
-                this.guards.position.x += .2;
-            }
-            if (this.guards.position.y > this.player.position.y) {
-                this.guards.position.y -= .2;
-            }else{
-                this.guards.position.y += .2;
-            }
-        }else{
-            this.seenFlag = false;
-        }
+        /* Changed this method such that it loops over an array of guards which are AnimatedSprites and
+        ensures that the player is visible before chasing
 
-    
-}
+        Also, handled the player damage directly here as a temporary fix since the current damage
+        handling doesn't work with an array of guards */
+
+        /* Added another change to check if the guard is distracted by a decoy, which can be used with
+        a mouse press */
+
+        for (let i = 0; i < this.guards.length; i++) {
+
+            let distracted = false;
+            for (let j = 0; j < this.moneys.length; j++) {
+                if (this.guards[i].position.distanceTo(this.moneys[j].position) < 25) {
+                    distracted = true
+                }
+            }
+        
+            if (this.guards[i].position.distanceTo(this.player.position) < 5 && !distracted && this.player.alpha != .5) {
+                this.player.health -= .02*this.multiplier;
+                this.guards[i].alpha = .99;
+                let xpos = this.player.position.x;
+                let ypos = this.player.position.y;
+                //this.lasers[i] = new Line(this.player.position, this.guards[i].position);
+                //this.lasers[i] = this.add.graphic(GraphicType.LINE, "primary", {start: this.player.position, end: this.guards[i].position}); 
+                if (this.time % 20 > 18) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "shoot", loop: false, holdReference: true});
+                }
+            }
+            else if (this.guards[i].position.distanceTo(this.player.position) < 50 && this.player.visible
+            && this.isTargetVisible(this.player.position, this.guards[i].position) && !distracted) {
+                this.seenFlag = true;
+                if (this.player.alpha != .5) {
+                    this.player.health -= .02*this.multiplier;
+                }
+                this.guards[i].alpha = .99;
+                let xpos = this.player.position.x;
+                let ypos = this.player.position.y;
+                //this.lasers[i] = new Line(this.player.position, this.guards[i].position);
+                //this.lasers[i] = this.add.graphic(GraphicType.LINE, "primary", {start: this.player.position, end: this.guards[i].position});
+                if (this.time % 20 > 18) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "shoot", loop: false, holdReference: true});
+                }
+                if (this.guards[i].position.x > this.player.position.x) {
+                    this.guards[i].position.x -= .7*this.multiplier;
+                }else{
+                    this.guards[i].position.x += .7*this.multiplier;
+                }
+                if (this.guards[i].position.y > this.player.position.y) {
+                    this.guards[i].position.y -= .7*this.multiplier;
+                }else{
+                    this.guards[i].position.y += .7*this.multiplier;
+                }
+            }else{
+                this.seenFlag = false;
+            }
+            
+        }    
+    }
+
     /**
      * Initialize the items in the scene
      */
@@ -432,6 +515,30 @@ export default class MainHW4Scene extends HW4Scene {
             this.offs[i].updateBoundary();
         }
 
+        let moneybags = this.load.getObject("moneybags");
+        this.moneybags = new Array<Moneybag>(moneybags.items.length);
+        for (let i = 0; i < moneybags.items.length; i++) {
+            let sprite = this.add.sprite("moneybag", "primary");
+            this.moneybags[i] = new Moneybag(sprite);
+            this.moneybags[i].position.set(moneybags.items[i][0], moneybags.items[i][1]);
+            this.moneybags[i].updateBoundary();
+        }
+
+        let decoys = this.load.getObject("decoys");
+        this.decoys = new Array<Decoy>(decoys.items.length);
+        for (let i = 0; i < decoys.items.length; i++) {
+            let sprite = this.add.sprite("decoy", "primary");
+            this.decoys[i] = new Decoy(sprite);
+            this.decoys[i].position.set(decoys.items[i][0], decoys.items[i][1]);
+            this.decoys[i].updateBoundary();
+        }
+
+        this.lasers = new Array<Line>(6);
+        for (let i = 0; i < this.lasers.length; i++) {
+            let line = new Line(Vec2.ZERO, Vec2.ZERO);
+            this.lasers[i] = line;
+        }
+
     }
 
     initializeUI(): void {
@@ -510,26 +617,19 @@ export default class MainHW4Scene extends HW4Scene {
     }
 
     public getPlayer(): Battler { return this.player; }
-
     public getWalls(): OrthogonalTilemap { return this.walls; }
-
     public getHealthpacks(): Healthpack[] { return this.healthpacks; }
-
     public getLaserGuns(): LaserGun[] { return this.laserguns; }
-
     public getKeys(): Key[] { return this.keys; }
-
     public getVents(): Vent[] { return this.vents; }
-
     public getSafes(): Safe[] { return this.safes; }
-
     public getObstacles(): Obstacle[] { return this.obstacles };
-
     public getLockers(): Locker[] { return this.lockers };
-
     public getElectricities(): Electricity[] { return this.electricities };
-
     public getOffs(): Off[] { return this.offs };
+    public getMoneybags(): Moneybag[] { return this.moneybags };
+    public getDecoys(): Decoy[] { return this.decoys };
+    public getBattlers(): Battler[] { return null };
 
     /**
      * Checks if the given target position is visible from the given position.
@@ -564,7 +664,7 @@ export default class MainHW4Scene extends HW4Scene {
                     let tilePos = new Vec2(col * tileSize.x + tileSize.x / 2, row * tileSize.y + tileSize.y / 2);
 
                     // Create a collider for this tile
-                    let collider = new AABB(tilePos, tileSize.scaled(1 / 2));
+                    let collider = new AABB(tilePos, tileSize.scaled(3 / 4));
 
                     let hit = collider.intersectSegment(start, delta, Vec2.ZERO);
 
@@ -589,6 +689,7 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let vent of this.vents) {
             if (vent.visible && this.player.collisionShape.overlaps(vent.boundary)) {
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "locker", loop: false, holdReference: true});
                 let random = Math.floor(Math.random() * this.vents.length);
                 let newPlayerPos: Vec2 = new Vec2(this.vents[random].position.x + 35, this.vents[random].position.y);
                 this.player.position = newPlayerPos;
@@ -597,10 +698,12 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let safe of this.safes) {
             if (safe.visible && this.player.collisionShape.overlaps(safe.boundary) && safe.unlooted) {
-                for (let item of this.player.inventory.inventory.values()) {
+                for (let item of this.player.inventory.items()) {
                     if (item instanceof Key) {
+                        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "money", loop: false, holdReference: true});
                         this.money += 100;
                         this.moneyLabel.text = `$: ${this.money}`;
+                        safe.unlooted = false;
                         let key = item.id;
                         this.player.inventory.remove(key);
                     }
@@ -610,7 +713,19 @@ export default class MainHW4Scene extends HW4Scene {
 
         for (let obstacle of this.obstacles) {
             if (obstacle.visible && this.player.collisionShape.overlaps(obstacle.boundary)) {
-                this.player.health -= .1;
+                if (!this.spotted) {
+                    this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "siren", loop: false, holdReference: true});
+                    //Player has been spotted, spawn more guards and make them stronger
+                    this.spotted = true;
+                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+                    this.guards[3].position.set(250, 250);
+                    this.guards[4].position.set(300, 350);
+                    this.guards[5].position.set(350, 100);
+                    //Set the multiplier to 2, guards now twice as fast and do twice as much damage
+                    this.multiplier = 2;
+                }
             }
         }
 
@@ -627,8 +742,9 @@ export default class MainHW4Scene extends HW4Scene {
         }
 
         for (let electricity of this.electricities) {
-            if (electricity.visible && this.player.collisionShape.overlaps(electricity.boundary)) {
-                this.player.health = 0;
+            if (electricity.visible && this.player.collisionShape.overlaps(electricity.boundary) && this.player.alpha != .5) {
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "electricity", loop: false, holdReference: true});
+                this.player.health -= 1;
             }
         }
 
@@ -641,5 +757,147 @@ export default class MainHW4Scene extends HW4Scene {
             }
         }
 
+        for (let moneybag of this.moneybags) {
+            if (moneybag.visible && this.player.collisionShape.overlaps(moneybag.boundary)) {
+                this.money += 50;
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "money", loop: false, holdReference: true});
+                this.moneyLabel.text = `$: ${this.money}`;
+                moneybag.visible = false;
+            }
+        }
+
+        for (let decoy of this.decoys) {
+            if (decoy.visible && this.player.collisionShape.overlaps(decoy.boundary)) {
+                decoy.visible = false;
+                this.player.inventory.add(decoy);
+            }
+        }
+
     }
+
+    useDecoy() {
+        if (Input.isMouseJustPressed()) {
+            for (let item of this.player.inventory.items()) {
+                if (item instanceof Decoy) {
+                    let sprite = this.add.sprite("money", "primary");
+                    let money = new Money(sprite);
+                    money.position.set(this.player.position.x, this.player.position.y);
+                    money.updateBoundary();
+                    this.moneys.push(money);
+                    let key = item.id;
+                    this.player.inventory.remove(key);
+                }
+            }
+        }
+    }
+
+    moveSpotlight(time: number) {
+        for (let i = 0; i < this.obstacles.length; i++) {
+            if (time % 400 > 199) {
+                this.obstacles[i].position.y += .5;
+            }
+            else {
+                this.obstacles[i].position.y -= .5;
+            }
+            this.obstacles[i].updateBoundary();
+        }
+    }
+
+    moveGuards(time: number) {
+        for (let i = 0; i < this.guards.length; i++) {
+            if (i == 0 && this.guards[0].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[0].position.x += .4;
+                }
+                else {
+                    this.guards[0].position.x -= .4;
+                } 
+            }
+            if (i == 1 && this.guards[1].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[1].position.y += .5;
+                }
+                else {
+                    this.guards[1].position.y -= .5;
+                } 
+            }
+            if (i == 2 && this.guards[2].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[2].position.y -= .5;
+                }
+                else {
+                    this.guards[2].position.y += .5;
+                } 
+            }
+            if (i == 3 && this.guards[3].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[3].position.y += .5;
+                }
+                else {
+                    this.guards[3].position.y -= .5;
+                } 
+            }
+            if (i == 4 && this.guards[4].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[4].position.y += .5;
+                }
+                else {
+                    this.guards[4].position.y -= .5;
+                } 
+            }
+            if (i == 5 && this.guards[5].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[5].position.y += .5;
+                }
+                else {
+                    this.guards[5].position.y -= .5;
+                } 
+            }
+        }
+    }
+
+    levelCompleteCheck() {
+        let levelComplete = true;
+        if (this.money >= 250) {
+            for (let safe of this.safes) {
+                if (safe.unlooted) {
+                    levelComplete = false;
+                }
+            }
+            if (levelComplete) {
+                this.sceneManager.changeToScene(Level1Complete);
+            }
+        }
+    }
+
+    cheatCodeCheck() {
+        
+        if (Input.isJustPressed("1")) {
+            this.sceneManager.changeToScene(Level1);
+        }
+        if (Input.isJustPressed("2")) {
+            this.sceneManager.changeToScene(Level2);
+        }
+        if (Input.isJustPressed("3")) {
+            this.sceneManager.changeToScene(Level3);
+        }
+        if (Input.isJustPressed("4")) {
+            this.sceneManager.changeToScene(Level4);
+        }
+        if (Input.isJustPressed("5")) {
+            this.sceneManager.changeToScene(Level5);
+        }
+        if (Input.isJustPressed("6")) {
+            this.sceneManager.changeToScene(Level6);
+        }
+        if (Input.isJustPressed("7")) {
+            if (this.player.alpha != .5) {
+                this.player.alpha = .5;
+            }
+            else {
+                this.player.alpha = 1;
+            }
+        }
+    }
+
 }

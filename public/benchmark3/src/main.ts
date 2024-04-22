@@ -20,6 +20,13 @@ import { PlayerInput } from "./hw4/AI/Player/PlayerController";
             {name: PlayerInput.DROP_ITEM, keys: ["q"]},
             {name: "slot1", keys: ["1"]},
             {name: "slot2", keys: ["2"]},
+            {name: "1", keys: ["1"]},
+            {name: "2", keys: ["2"]},
+            {name: "3", keys: ["3"]},
+            {name: "4", keys: ["4"]},
+            {name: "5", keys: ["5"]},
+            {name: "6", keys: ["6"]},
+            {name: "7", keys: ["7"]}
         ],
         useWebGL: false,                        // Tell the game we want to use webgl
         showDebug: false                      // Whether to show debug messages. You can change this to true if you want

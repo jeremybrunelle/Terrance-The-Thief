@@ -4,7 +4,7 @@ import Sprite from "../../../../Wolfie2D/Nodes/Sprites/Sprite";
 import HW4Scene from "../../../Scenes/HW4Scene";
 import Item from "../Item";
 
-export default class Obstacle extends Item {
+export default class Moneybag extends Item {
 
     boundary: AABB;
 
@@ -15,7 +15,7 @@ export default class Obstacle extends Item {
 
     updateBoundary(): void {
 		this.boundary.center.set(this.position.x, this.position.y);
-		this.boundary.halfSize.set(32, 32);
+		this.boundary.halfSize.set(10, 10);
 	}
 
 }

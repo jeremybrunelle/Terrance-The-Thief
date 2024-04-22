@@ -4,7 +4,7 @@ import OrthogonalTilemap from "../../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilema
 import GameEvent from "../../../Wolfie2D/Events/GameEvent";
 import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 import MathUtils from "../../../Wolfie2D/Utils/MathUtils";
-import { Events } from "../../Events";
+//import { Events } from "../../Events";
 
 import Timer from "../../../Wolfie2D/Timing/Timer";
 import Rect from "../../../Wolfie2D/Nodes/Graphics/Rect";
@@ -80,9 +80,9 @@ export default class GuardController extends StateMachineAI {
         this.addState(GuardStates.PATROL, new Patrol(this, this.owner, this.player, this.levelEndArea, 200));
         this.addState(GuardStates.CHASE, new Chase(this, this.owner, this.player, this.levelEndArea));
 
-        this.receiver.subscribe(Events.IN_HIDING);
+        /*this.receiver.subscribe(Events.IN_HIDING);
         this.receiver.subscribe(Events.NOT_HIDING);
-        this.receiver.subscribe(Events.PLAYER_GUARD_HIT);
+        this.receiver.subscribe(Events.PLAYER_GUARD_HIT);*/
         this.initialize(GuardStates.PATROL);
     }
 
@@ -104,9 +104,9 @@ export default class GuardController extends StateMachineAI {
             this.handleEvent(this.receiver.getNextEvent());
         }
         
-        if(this.owner.collisionShape.overlaps(this.player.collisionShape)){
+        /*if(this.owner.collisionShape.overlaps(this.player.collisionShape)){
             this.handlePlayerGooseCollision();   
-        }
+        }*/
         
 	}
     protected handleChase(): void {
@@ -117,7 +117,7 @@ export default class GuardController extends StateMachineAI {
     }
 
     public handleEvent(event: GameEvent): void {
-        switch(event.type){
+        /*switch(event.type){
             case(Events.IN_HIDING):
                 this.isPlayerHiding = true;
                 break;
@@ -125,17 +125,17 @@ export default class GuardController extends StateMachineAI {
                 this.isPlayerHiding = false
                 break;
             }    
-        }
+        }*/
     }
 
     protected handlePlayerInView(): void {
         
     }
    
-    protected handlePlayerGooseCollision(): void {
+    /*protected handlePlayerGooseCollision(): void {
         this.emitter.fireEvent(Events.PLAYER_GUARD_HIT);
        
-    }
+    }*/
     public get velocity(): Vec2 { return this._velocity; }
     public set velocity(velocity: Vec2) { this._velocity = velocity; }
 
