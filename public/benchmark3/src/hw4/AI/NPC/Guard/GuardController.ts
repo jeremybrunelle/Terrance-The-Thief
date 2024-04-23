@@ -1,6 +1,6 @@
-import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
-import Input from "../../../Wolfie2D/Input/Input";
-import AnimatedSprite from "../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
+import Vec2 from "../../../../Wolfie2D/DataTypes/Vec2";
+import Input from "../../../../Wolfie2D/Input/Input";
+import AnimatedSprite from "../../../../Wolfie2D/Nodes/Sprites/AnimatedSprite";
 
 /**
  * Strings used in the key binding for the player
@@ -24,11 +24,8 @@ export default class PlayerController {
     /** The GameNode that owns the AI */
     protected owner: AnimatedSprite;
 
-    protected loudness: number;
-
     constructor(owner: AnimatedSprite) {
         this.owner = owner;
-        this.loudness=0;
     }
 
     /**
@@ -60,22 +57,19 @@ export default class PlayerController {
      * Checks if the player is attempting to use a held item or not.
      * @return true if the player is attempting to use a held item; false otherwise
      */
-    public get useItem(): boolean { return Input.isMouseJustPressed(); }
+    //public get useItem(): boolean { return Input.isMouseJustPressed(); }
 
     /** 
      * Checks if the player is attempting to pick up an item or not.
      * @return true if the player is attempting to pick up an item; false otherwise.
      */
-    public get pickingUp(): boolean { return Input.isJustPressed(PlayerInput.PICKUP_ITEM); }
+    //public get pickingUp(): boolean { return Input.isJustPressed(PlayerInput.PICKUP_ITEM); }
 
     /** 
      * Checks if the player is attempting to drop their held item or not.
      * @return true if the player is attempting to drop their held item; false otherwise.
      */
-    public get dropping(): boolean { return Input.isJustPressed(PlayerInput.DROP_ITEM); }
+    //public get dropping(): boolean { return Input.isJustPressed(PlayerInput.DROP_ITEM); }
 
-    public get loudnessLevel(): number { return this.loudness; }
-
-    public updateLoudness(loudness: number) { this.loudness = loudness; }
-
+    
 }

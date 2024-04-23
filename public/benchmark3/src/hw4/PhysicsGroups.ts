@@ -3,7 +3,6 @@ export const PhysicsGroups = {
     PLAYER: "PLAYER",
     PLAYER_ITEM: "ITEM",
     GUARD: "GUARD",
-
     GROUND: "GROUND",
 
     
