@@ -6,7 +6,8 @@ import PlayerAI from "../PlayerAI";
 
 
 export enum PlayerAnimationType {
-    IDLE = "IDLE"
+    IDLE = "IDLE",
+    MOVING= "MOVING",
 }
 
 

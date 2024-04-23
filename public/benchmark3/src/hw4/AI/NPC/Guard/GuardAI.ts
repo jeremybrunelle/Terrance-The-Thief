@@ -6,7 +6,6 @@ import NPCActor from "../../../Actors/NPCActor";
 import { GuardEvent, ItemEvent } from "../../../Events";
 import Inventory from "../../../GameSystems/ItemSystem/Inventory";
 import Item from "../../../GameSystems/ItemSystem/Item";
-import MainHW4Scene from "../../../Scenes/MainHW4Scene";
 import GuardController from "./GuardController";
 import { Patrol, Chase, Stunned, Distracted, GuardStateType } from "./GuardStates/GuardState";
 import NPCBehavior from "../NPCBehavior";

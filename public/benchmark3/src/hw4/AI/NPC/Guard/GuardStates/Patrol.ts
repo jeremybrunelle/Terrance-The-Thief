@@ -6,7 +6,7 @@ import GuardState from "./GuardState";
 export default class Patrol extends GuardState {
 
     public override onEnter(options: Record<string, any>): void {
-        this.parent.owner.animation.playIfNotAlready(GuardAnimationType.IDLE, true);
+        this.parent.owner.animation.playIfNotAlready(GuardAnimationType.PATROL, true);
     }
 
     public override handleInput(event: GameEvent): void {

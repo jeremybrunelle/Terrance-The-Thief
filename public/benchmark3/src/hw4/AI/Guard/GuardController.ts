@@ -1,3 +1,4 @@
+
 import StateMachineAI from "../../../Wolfie2D/AI/StateMachineAI";
 import Vec2 from "../../../Wolfie2D/DataTypes/Vec2";
 import OrthogonalTilemap from "../../../Wolfie2D/Nodes/Tilemaps/OrthogonalTilemap";
@@ -16,7 +17,6 @@ import Patrol from "./GuardStates/Patrol";
  */
 export const GuardAnimations = {
     IDLE: "IDLE",
-    WALK: "WALK",
     PATROL: "PATROL",
     CHASE: "CHASE",   
 } as const

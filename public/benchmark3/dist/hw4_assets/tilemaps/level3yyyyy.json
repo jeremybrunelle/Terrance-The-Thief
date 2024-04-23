@@ -14,11 +14,11 @@
          "name":"Tile Layer 1",
          "opacity":1,
          "properties":
-            {
+            [{
               "name":"Collidable",
               "type":"bool",
               "value":false
-            },
+            }],
          "type":"tilelayer",
          "visible":true,
          "width":10,
@@ -37,11 +37,11 @@
          "name":"Tile Layer 2",
          "opacity":1,
          "properties":
-            {
+            [{
               "name":"Collidable",
               "type":"bool",
               "value":false
-            },
+            }],
          "type":"tilelayer",
          "visible":true,
          "width":10,
@@ -58,6 +58,12 @@
                  "id":1,
                  "name":"",
                  "rotation":0,
+                 "properties":
+                 [{
+                      "name":"Collidable",
+                      "type":"bool",
+                      "value":true
+                    }],
                  "type":"",
                  "visible":true,
                  "width":8.99102,
@@ -69,6 +75,12 @@
                  "id":2,
                  "name":"",
                  "rotation":0,
+                 "properties":
+                 [{
+                      "name":"Collidable",
+                      "type":"bool",
+                      "value":true
+                    }],
                  "type":"",
                  "visible":true,
                  "width":8.3488,
@@ -80,6 +92,12 @@
                  "id":3,
                  "name":"",
                  "rotation":0,
+                 "properties":
+                 [{
+                      "name":"Collidable",
+                      "type":"bool",
+                      "value":true
+                    }],
                  "type":"",
                  "visible":true,
                  "width":9.63323,
@@ -91,6 +109,12 @@
                  "id":4,
                  "name":"",
                  "rotation":0,
+                 "properties":
+                 [{
+                      "name":"Collidable",
+                      "type":"bool",
+                      "value":true
+                    }],
                  "type":"",
                  "visible":true,
                  "width":10.2755,
@@ -102,6 +126,12 @@
                  "id":5,
                  "name":"",
                  "rotation":0,
+                 "properties":
+                 [{
+                      "name":"Collidable",
+                      "type":"bool",
+                      "value":true
+                    }],
                  "type":"",
                  "visible":true,
                  "width":30.5052,
@@ -121,11 +151,11 @@
                 }],
          "opacity":1,
          "properties":
-         {
+         [{
               "name":"Collidable",
               "type":"bool",
               "value":true
-            },
+            }],
          "type":"objectgroup",
          "visible":true,
          "x":0,

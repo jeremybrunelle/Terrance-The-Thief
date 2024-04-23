@@ -132,7 +132,8 @@ export default class Level2 extends HW4Scene {
      */
     public override loadScene() {
         // Load the player and enemy spritesheets
-        this.load.spritesheet("player1", "hw4_assets/spritesheets/player1.json");
+        this.load.spritesheet("player1", "hw4_assets/spritesheets/terrance.json");
+        this.load.spritesheet("guard", "hw4_assets/spritesheets/Guard.json");
 
         // Load the tilemap
         this.load.tilemap("level", "hw4_assets/tilemaps/level2tilemap.json");
@@ -173,7 +174,7 @@ export default class Level2 extends HW4Scene {
         this.load.audio("locker", "hw4_assets/audio/locker.mp3");
         this.load.audio("shoot", "hw4_assets/audio/shoot.mp3");
         this.load.audio("electricity", "hw4_assets/audio/electricity.mp3");
-
+        this.load.audio("levelMusuc", "hw4_assets/audio/levelMusic2.mp3");
     }
     /**
      * @see Scene.startScene
@@ -187,6 +188,7 @@ export default class Level2 extends HW4Scene {
 
         // Set the viewport bounds to the tilemap
         let tilemapSize: Vec2 = this.walls.size;
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "levelMusic", loop: true, holdReference: true});
 
         this.viewport.setBounds(0, 0, tilemapSize.x, tilemapSize.y);
         this.viewport.setZoomLevel(2);
@@ -361,9 +363,9 @@ export default class Level2 extends HW4Scene {
      * Initialize the NPCs 
      */
     protected initializeNPCs(): void {
-        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards[0].position.set(100, 100);
         this.guards[1].position.set(280, 150);
         this.guards[2].position.set(100, 260);
@@ -718,9 +720,9 @@ export default class Level2 extends HW4Scene {
                     this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "siren", loop: false, holdReference: true});
                     //Player has been spotted, spawn more guards and make them stronger
                     this.spotted = true;
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
                     this.guards[3].position.set(250, 250);
                     this.guards[4].position.set(300, 350);
                     this.guards[5].position.set(350, 100);

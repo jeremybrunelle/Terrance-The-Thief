@@ -132,7 +132,8 @@ export default class Level4 extends HW4Scene {
      */
     public override loadScene() {
         // Load the player and enemy spritesheets
-        this.load.spritesheet("player1", "hw4_assets/spritesheets/player1.json");
+        this.load.spritesheet("player1", "hw4_assets/spritesheets/terrance.json");
+        this.load.spritesheet("guard", "hw4_assets/spritesheets/guard.json");
 
         // Load the tilemap
         this.load.tilemap("level", "hw4_assets/tilemaps/HW4Tilemap.json");
@@ -173,6 +174,7 @@ export default class Level4 extends HW4Scene {
         this.load.audio("locker", "hw4_assets/audio/locker.mp3");
         this.load.audio("shoot", "hw4_assets/audio/shoot.mp3");
         this.load.audio("electricity", "hw4_assets/audio/electricity.mp3");
+        this.load.audio("levelMusic", "hw4_assets/audio/levelMusic2.mp3");
 
     }
     /**
@@ -190,6 +192,7 @@ export default class Level4 extends HW4Scene {
 
         this.viewport.setBounds(0, 0, tilemapSize.x, tilemapSize.y);
         this.viewport.setZoomLevel(2);
+        this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "levelMusic", loop: true, holdReference: true});
 
         this.initLayers();
         
@@ -361,9 +364,9 @@ export default class Level4 extends HW4Scene {
      * Initialize the NPCs 
      */
     protected initializeNPCs(): void {
-        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards[0].position.set(100, 100);
         this.guards[1].position.set(280, 150);
         this.guards[2].position.set(100, 260);

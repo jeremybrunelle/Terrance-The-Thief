@@ -132,10 +132,11 @@ export default class Level3 extends HW4Scene {
      */
     public override loadScene() {
         // Load the player and enemy spritesheets
-        this.load.spritesheet("player1", "hw4_assets/spritesheets/player1.json");
+        this.load.spritesheet("player1", "hw4_assets/spritesheets/terrance.json");
+        this.load.spritesheet("guard", "hw4_assets/spritesheets/Guard.json");
 
         // Load the tilemap
-        this.load.tilemap("level", "hw4_assets/tilemaps/HW4Tilemap.json");
+        this.load.tilemap("level", "hw4_assets/tilemaps/level333.json");
 
         // Load the item loactions
         this.load.object("healthpacks", "hw4_assets/data/items/level3healthpacks.json");
@@ -230,11 +231,12 @@ export default class Level3 extends HW4Scene {
                 this.player.visible = true;
             }
         }
+        
 
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-
+        
         this.useDecoy();
         this.moveSpotlight(this.time);
         this.moveGuards(this.time);
@@ -257,8 +259,9 @@ export default class Level3 extends HW4Scene {
             this.healthTimer++;
         }
         this.time += 1;
+        
     }
-
+    
     /**
      * Handle events from the rest of the game
      * @param event a game event
@@ -361,10 +364,10 @@ export default class Level3 extends HW4Scene {
      * Initialize the NPCs 
      */
     protected initializeNPCs(): void {
-        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-        this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-        this.guards[0].position.set(100, 100);
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards[0].position.set(250, 500);
         this.guards[1].position.set(280, 150);
         this.guards[2].position.set(100, 260);
 
@@ -444,33 +447,11 @@ export default class Level3 extends HW4Scene {
             this.healthpacks[i].updateBoundary();
         }
     
-        let keys = this.load.getObject("keys");
-        this.keys = new Array<Key>(keys.items.length);
-        for (let i = 0; i < keys.items.length; i++) {
-            let sprite = this.add.sprite("key", "primary");
-            this.keys[i] = new Key(sprite);
-            this.keys[i].position.set(keys.items[i][0], keys.items[i][1]);
-            this.keys[i].updateBoundary();
-        }
+       
 
-        let vents = this.load.getObject("vents");
-        this.vents = new Array<Vent>(vents.items.length);
-        for (let i = 0; i < vents.items.length; i++) {
-            let sprite = this.add.sprite("vent", "primary");
-            this.vents[i] = new Vent(sprite);
-            this.vents[i].position.set(vents.items[i][0], vents.items[i][1]);
-            this.vents[i].updateBoundary();
-        }
 
-        let safes = this.load.getObject("safes");
-        this.safes = new Array<Safe>(safes.items.length);
-        for (let i = 0; i < safes.items.length; i++) {
-            let sprite = this.add.sprite("safe", "primary");
-            this.safes[i] = new Safe(sprite);
-            this.safes[i].position.set(safes.items[i][0], safes.items[i][1]);
-            this.safes[i].updateBoundary();
-        }
-
+    
+/*
         let obstacles = this.load.getObject("obstacles");
         this.obstacles = new Array<Obstacle>(obstacles.items.length);
         for (let i = 0; i < obstacles.items.length; i++) {
@@ -479,6 +460,7 @@ export default class Level3 extends HW4Scene {
             this.obstacles[i].position.set(obstacles.items[i][0], obstacles.items[i][1]);
             this.obstacles[i].updateBoundary();
         }
+        */
 
         let lockers = this.load.getObject("lockers");
         this.lockers = new Array<Locker>(lockers.items.length);
@@ -489,32 +471,9 @@ export default class Level3 extends HW4Scene {
             this.lockers[i].updateBoundary();
         }
 
-        let electricities = this.load.getObject("electricities");
-        this.electricities = new Array<Electricity>(electricities.items.length);
-        for (let i = 0; i < electricities.items.length; i++) {
-            let sprite = this.add.sprite("electricity", "primary");
-            this.electricities[i] = new Electricity(sprite);
-            this.electricities[i].position.set(electricities.items[i][0], electricities.items[i][1]);
-            this.electricities[i].updateBoundary();
-        }
 
-        let switches = this.load.getObject("switches");
-        this.switches = new Array<Switch>(switches.items.length);
-        for (let i = 0; i < switches.items.length; i++) {
-            let sprite = this.add.sprite("switch", "primary");
-            this.switches[i] = new Switch(sprite);
-            this.switches[i].position.set(switches.items[i][0], switches.items[i][1]);
-            this.switches[i].updateBoundary();
-        }
 
-        let offs = this.load.getObject("offs");
-        this.offs = new Array<Off>(offs.items.length);
-        for (let i = 0; i < offs.items.length; i++) {
-            let sprite = this.add.sprite("off", "primary");
-            this.offs[i] = new Off(sprite);
-            this.offs[i].position.set(offs.items[i][0], offs.items[i][1]);
-            this.offs[i].updateBoundary();
-        }
+
 
         let moneybags = this.load.getObject("moneybags");
         this.moneybags = new Array<Moneybag>(moneybags.items.length);
@@ -523,7 +482,10 @@ export default class Level3 extends HW4Scene {
             this.moneybags[i] = new Moneybag(sprite);
             this.moneybags[i].position.set(moneybags.items[i][0], moneybags.items[i][1]);
             this.moneybags[i].updateBoundary();
+
         }
+
+
 
         let decoys = this.load.getObject("decoys");
         this.decoys = new Array<Decoy>(decoys.items.length);
@@ -533,7 +495,7 @@ export default class Level3 extends HW4Scene {
             this.decoys[i].position.set(decoys.items[i][0], decoys.items[i][1]);
             this.decoys[i].updateBoundary();
         }
-
+        
         this.lasers = new Array<Line>(6);
         for (let i = 0; i < this.lasers.length; i++) {
             let line = new Line(Vec2.ZERO, Vec2.ZERO);
@@ -718,14 +680,14 @@ export default class Level3 extends HW4Scene {
                     this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "siren", loop: false, holdReference: true});
                     //Player has been spotted, spawn more guards and make them stronger
                     this.spotted = true;
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "uaurd", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
                     this.guards[3].position.set(250, 250);
                     this.guards[4].position.set(300, 350);
                     this.guards[5].position.set(350, 100);
                     //Set the multiplier to 2, guards now twice as fast and do twice as much damage
-                    this.multiplier = 2;
+                    this.multiplier = 1.2;
                 }
             }
         }
@@ -742,21 +704,6 @@ export default class Level3 extends HW4Scene {
             }
         }
 
-        for (let electricity of this.electricities) {
-            if (electricity.visible && this.player.collisionShape.overlaps(electricity.boundary) && this.player.alpha != .5) {
-                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "electricity", loop: false, holdReference: true});
-                this.player.health -= 1;
-            }
-        }
-
-        for (let off of this.offs) {
-            if (off.visible && this.player.collisionShape.overlaps(off.boundary)) {
-                for (let electricity of this.electricities) {
-                    electricity.visible = false;
-                }
-                off.visible = false;
-            }
-        }
 
         for (let moneybag of this.moneybags) {
             if (moneybag.visible && this.player.collisionShape.overlaps(moneybag.boundary)) {
@@ -859,7 +806,7 @@ export default class Level3 extends HW4Scene {
 
     levelCompleteCheck() {
         let levelComplete = true;
-        if (this.money > 500) {
+        if (this.money > 200) {
             for (let safe of this.safes) {
                 if (safe.unlooted) {
                     levelComplete = false;

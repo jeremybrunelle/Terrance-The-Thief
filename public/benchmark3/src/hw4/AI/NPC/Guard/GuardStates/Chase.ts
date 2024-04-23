@@ -2,11 +2,12 @@ import Vec2 from "../../../../../Wolfie2D/DataTypes/Vec2";
 import GameEvent from "../../../../../Wolfie2D/Events/GameEvent";
 import { GuardStateType } from "./GuardState";
 import GuardState from "./GuardState";
+import { GuardAnimationType } from "./GuardState";
 
 export default class Chase extends GuardState {
     
     public override onEnter(options: Record<string, any>): void {
-    
+        this.parent.owner.animation.playIfNotAlready(GuardAnimationType.PATROL, true);
     }
 
     public override handleInput(event: GameEvent): void { 
