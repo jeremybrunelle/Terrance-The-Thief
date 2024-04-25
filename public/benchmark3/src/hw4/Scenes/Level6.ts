@@ -864,7 +864,7 @@ export default class Level6 extends HW4Scene {
 
     levelCompleteCheck() {
         let levelComplete = true;
-        if (this.money > 500) {
+        if (this.money > 200) {
             for (let safe of this.safes) {
                 if (safe.unlooted) {
                     levelComplete = false;

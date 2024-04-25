@@ -8,7 +8,7 @@ import MainHW4Scene from "./Level1";
 import ControlsScene from "./ControlsScene";
 import HelpScene from "./HelpScene";
 import GameEvent from "../../Wolfie2D/Events/GameEvent";
-import Level3 from "./Level3";
+import Level1 from "./Level1";
 export default class MainMenu extends Scene {
     // Layers, for multiple main menu screens
     private mainMenu: Layer;
@@ -61,7 +61,7 @@ export default class MainMenu extends Scene {
     public handleEvent(event: GameEvent): void {
         switch(event.type) {
             case "play": {
-                this.sceneManager.changeToScene(Level3);
+                this.sceneManager.changeToScene(Level1);
                 break;
             }
             case "controls": {

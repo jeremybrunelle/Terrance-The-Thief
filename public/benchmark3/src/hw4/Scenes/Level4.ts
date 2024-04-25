@@ -133,7 +133,7 @@ export default class Level4 extends HW4Scene {
     public override loadScene() {
         // Load the player and enemy spritesheets
         this.load.spritesheet("player1", "hw4_assets/spritesheets/terrance.json");
-        this.load.spritesheet("guard", "hw4_assets/spritesheets/guard.json");
+        this.load.spritesheet("guard", "hw4_assets/spritesheets/Guard.json");
 
         // Load the tilemap
         this.load.tilemap("level", "hw4_assets/tilemaps/HW4Tilemap.json");
@@ -862,7 +862,7 @@ export default class Level4 extends HW4Scene {
 
     levelCompleteCheck() {
         let levelComplete = true;
-        if (this.money > 500) {
+        if (this.money > 200) {
             for (let safe of this.safes) {
                 if (safe.unlooted) {
                     levelComplete = false;
