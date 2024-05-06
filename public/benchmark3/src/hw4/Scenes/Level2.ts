@@ -40,6 +40,7 @@ import Switch from "../GameSystems/ItemSystem/Items/Switch";
 import Moneybag from "../GameSystems/ItemSystem/Items/Moneybag";
 import Decoy from "../GameSystems/ItemSystem/Items/Decoy";
 import Money from "../GameSystems/ItemSystem/Items/Money";
+import Potion from "../GameSystems/ItemSystem/Items/Potion";
 import { ClosestPositioned } from "../GameSystems/Searching/HW4Reducers";
 import BasicTargetable from "../GameSystems/Targeting/BasicTargetable";
 import Position from "../GameSystems/Targeting/Position";
@@ -76,6 +77,7 @@ export default class Level2 extends HW4Scene {
     private moneyLabel: Label;
     public money: number = 0;
     private time: number = 0;
+    private invistime: number = -1;
     private spotted: boolean = false;
     private multiplier: number = 1;
 
@@ -97,6 +99,7 @@ export default class Level2 extends HW4Scene {
     private moneybags: Array<Moneybag>;
     private decoys: Array<Decoy>;
     private moneys: Array<Money>;
+    private potions: Array<Potion>;
 
     // The wall layer of the tilemap
     private walls: OrthogonalTilemap;
@@ -125,6 +128,7 @@ export default class Level2 extends HW4Scene {
         this.decoys = new Array<Decoy>();
         this.moneys = new Array<Money>();
         this.guards = new Array<AnimatedSprite>();
+        this.potions = new Array<Potion>();
     }
 
     /**
@@ -149,6 +153,7 @@ export default class Level2 extends HW4Scene {
         this.load.object("offs", "hw4_assets/data/items/level2offs.json");
         this.load.object("moneybags", "hw4_assets/data/items/level2moneybags.json");
         this.load.object("decoys", "hw4_assets/data/items/level2decoys.json");
+        this.load.object("potions", "hw4_assets/data/items/level1potions.json");
 
         // Load the sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
@@ -165,6 +170,7 @@ export default class Level2 extends HW4Scene {
         this.load.image("moneybag", "hw4_assets/sprites/moneybag.png");
         this.load.image("decoy", "hw4_assets/sprites/decoy.png");
         this.load.image("money", "hw4_assets/sprites/money.png");
+        this.load.image("potion", "hw4_assets/sprites/potion.png");
         
 
         // Load the audios
@@ -241,6 +247,9 @@ export default class Level2 extends HW4Scene {
         this.inventoryHud.update(deltaT);
         this.playerHealthbar.update(deltaT);
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
+        if (this.invistime == this.time) {
+            this.player.alpha = 1;
+        }
         for (let i = 0; i < this.lasers.length; i++) {
             let line = new Line(Vec2.ZERO, Vec2.ZERO);
             this.lasers[i] = line;
@@ -534,6 +543,15 @@ export default class Level2 extends HW4Scene {
             this.decoys[i].updateBoundary();
         }
 
+        let potions = this.load.getObject("potions");
+        this.potions = new Array<Potion>(potions.items.length);
+        for (let i = 0; i < potions.items.length; i++) {
+            let sprite = this.add.sprite("potion", "primary");
+            this.potions[i] = new Potion(sprite);
+            this.potions[i].position.set(potions.items[i][0], potions.items[i][1]);
+            this.potions[i].updateBoundary();
+        }
+
         this.lasers = new Array<Line>(6);
         for (let i = 0; i < this.lasers.length; i++) {
             let line = new Line(Vec2.ZERO, Vec2.ZERO);
@@ -630,6 +648,7 @@ export default class Level2 extends HW4Scene {
     public getOffs(): Off[] { return this.offs };
     public getMoneybags(): Moneybag[] { return this.moneybags };
     public getDecoys(): Decoy[] { return this.decoys };
+    public getPotions(): Potion[] { return this.potions };
     public getBattlers(): Battler[] { return null };
 
     /**
@@ -771,6 +790,14 @@ export default class Level2 extends HW4Scene {
             if (decoy.visible && this.player.collisionShape.overlaps(decoy.boundary)) {
                 decoy.visible = false;
                 this.player.inventory.add(decoy);
+            }
+        }
+
+        for (let potion of this.potions) {
+            if (potion.visible && this.player.collisionShape.overlaps(potion.boundary)) {
+                potion.visible = false;
+                this.player.alpha = .5;
+                this.invistime = this.time + 300;
             }
         }
 
