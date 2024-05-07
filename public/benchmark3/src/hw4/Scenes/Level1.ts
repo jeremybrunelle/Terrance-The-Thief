@@ -377,9 +377,17 @@ export default class Level1 extends HW4Scene {
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
-        this.guards[0].position.set(250, 500);
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards[0].position.set(250, 490);
         this.guards[1].position.set(280, 150);
         this.guards[2].position.set(100, 260);
+        this.guards[3].position.set(50, 200);
+        this.guards[4].position.set(250, 250);
+        this.guards[5].position.set(380, 125);
+        this.guards[6].position.set(225, 350);
 
     }
     protected enterChase(): void {
@@ -744,9 +752,9 @@ export default class Level1 extends HW4Scene {
                     this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
                     this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
                     this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
-                    this.guards[3].position.set(250, 250);
-                    this.guards[4].position.set(300, 350);
-                    this.guards[5].position.set(350, 100);
+                    this.guards[7].position.set(250, 250);
+                    this.guards[8].position.set(300, 350);
+                    this.guards[9].position.set(350, 100);
                     //Set the multiplier to 2, guards now twice as fast and do twice as much damage
                     this.multiplier = 2;
                 }
@@ -798,7 +806,7 @@ export default class Level1 extends HW4Scene {
         }
 
         for (let potion of this.potions) {
-            if (potion.visible && this.player.collisionShape.overlaps(potion.boundary)) {
+            if (potion.visible && this.player.collisionShape.overlaps(potion.boundary) && this.player.alpha != .5) {
                 potion.visible = false;
                 this.player.alpha = .5;
                 this.invistime = this.time + 300;
@@ -883,6 +891,14 @@ export default class Level1 extends HW4Scene {
                 }
                 else {
                     this.guards[5].position.y -= .5;
+                } 
+            }
+            if (i == 6 && this.guards[6].alpha != .99) {
+                if (time % 400 > 199) {
+                    this.guards[6].position.x += .5;
+                }
+                else {
+                    this.guards[6].position.x -= .5;
                 } 
             }
         }

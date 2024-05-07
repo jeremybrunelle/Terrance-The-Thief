@@ -154,7 +154,7 @@ export default class Level2 extends HW4Scene {
         this.load.object("offs", "hw4_assets/data/items/level2offs.json");
         this.load.object("moneybags", "hw4_assets/data/items/level2moneybags.json");
         this.load.object("decoys", "hw4_assets/data/items/level2decoys.json");
-        this.load.object("potions", "hw4_assets/data/items/level1potions.json");
+        this.load.object("potions", "hw4_assets/data/items/level2potions.json");
 
         // Load the sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
@@ -375,9 +375,30 @@ export default class Level2 extends HW4Scene {
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards[0].position.set(100, 100);
-        this.guards[1].position.set(280, 150);
+        this.guards[1].position.set(280, 20);
         this.guards[2].position.set(100, 260);
+        this.guards[3].position.set(100, 20);
+        this.guards[4].position.set(220, 260);
+        this.guards[5].position.set(200, 20);
+        this.guards[6].position.set(220, 450);
+        this.guards[7].position.set(200, 325);
+        this.guards[8].position.set(490, 350);
+        this.guards[9].position.set(220, 250);
+        this.guards[10].position.set(220, 290);
+        this.guards[11].position.set(194, 270);
+        this.guards[12].position.set(247, 270);
+        
 
     }
     protected enterChase(): void {
@@ -772,10 +793,21 @@ export default class Level2 extends HW4Scene {
 
         for (let off of this.offs) {
             if (off.visible && this.player.collisionShape.overlaps(off.boundary)) {
-                for (let electricity of this.electricities) {
+                /*for (let electricity of this.electricities) {
                     electricity.visible = false;
-                }
+                }*/
                 off.visible = false;
+                let num = 0;
+                for (let off of this.offs) {
+                    if (!off.visible) {
+                        num += 1;
+                    }
+                    if (num == this.offs.length) {
+                        for (let electricity of this.electricities) {
+                            electricity.visible = false;
+                        }
+                    }
+                }
             }
         }
 
@@ -796,7 +828,7 @@ export default class Level2 extends HW4Scene {
         }
 
         for (let potion of this.potions) {
-            if (potion.visible && this.player.collisionShape.overlaps(potion.boundary)) {
+            if (potion.visible && this.player.collisionShape.overlaps(potion.boundary) && this.player.alpha != .5) {
                 potion.visible = false;
                 this.player.alpha = .5;
                 this.invistime = this.time + 300;
@@ -816,6 +848,7 @@ export default class Level2 extends HW4Scene {
                     this.moneys.push(money);
                     let key = item.id;
                     this.player.inventory.remove(key);
+                    break;
                 }
             }
         }
@@ -823,11 +856,17 @@ export default class Level2 extends HW4Scene {
 
     moveSpotlight(time: number) {
         for (let i = 0; i < this.obstacles.length; i++) {
-            if (time % 400 > 199) {
-                this.obstacles[i].position.y += .5;
+            if (time % 400 > 299) {
+                this.obstacles[i].position.x -= 1;
+            }
+            else if (time % 400 > 199) {
+                this.obstacles[i].position.y += 1;
+            }
+            else if (time % 400 > 99) {
+                this.obstacles[i].position.x += 1;
             }
             else {
-                this.obstacles[i].position.y -= .5;
+                this.obstacles[i].position.y -= 1;
             }
             this.obstacles[i].updateBoundary();
         }
@@ -845,26 +884,26 @@ export default class Level2 extends HW4Scene {
             }
             if (i == 1 && this.guards[1].alpha != .99) {
                 if (time % 400 > 199) {
-                    this.guards[1].position.y += .5;
+                    this.guards[1].position.y -= .5;
                 }
                 else {
-                    this.guards[1].position.y -= .5;
+                    this.guards[1].position.y += .5;
                 } 
             }
             if (i == 2 && this.guards[2].alpha != .99) {
-                if (time % 400 > 199) {
-                    this.guards[2].position.y -= .5;
+                if (time % 200 > 99) {
+                    this.guards[2].position.y -= 1;
                 }
                 else {
-                    this.guards[2].position.y += .5;
+                    this.guards[2].position.y += 1;
                 } 
             }
             if (i == 3 && this.guards[3].alpha != .99) {
-                if (time % 400 > 199) {
-                    this.guards[3].position.y += .5;
+                if (time % 200 > 99) {
+                    this.guards[3].position.y -= 1;
                 }
                 else {
-                    this.guards[3].position.y -= .5;
+                    this.guards[3].position.y += 1;
                 } 
             }
             if (i == 4 && this.guards[4].alpha != .99) {
@@ -877,10 +916,26 @@ export default class Level2 extends HW4Scene {
             }
             if (i == 5 && this.guards[5].alpha != .99) {
                 if (time % 400 > 199) {
-                    this.guards[5].position.y += .5;
+                    this.guards[5].position.x += .5;
                 }
                 else {
-                    this.guards[5].position.y -= .5;
+                    this.guards[5].position.x -= .5;
+                } 
+            }
+            if (i == 6 && this.guards[6].alpha != .99) {
+                if (time % 200 > 99) {
+                    this.guards[6].position.y += 1;
+                }
+                else {
+                    this.guards[6].position.y -= 1;
+                } 
+            }
+            if (i == 7 && this.guards[7].alpha != .99) {
+                if (time % 200 > 99) {
+                    this.guards[7].position.x += 1;
+                }
+                else {
+                    this.guards[7].position.x -= 1;
                 } 
             }
         }

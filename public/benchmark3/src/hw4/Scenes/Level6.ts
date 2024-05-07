@@ -155,7 +155,7 @@ export default class Level6 extends HW4Scene {
         this.load.object("offs", "hw4_assets/data/items/level6offs.json");
         this.load.object("moneybags", "hw4_assets/data/items/level6moneybags.json");
         this.load.object("decoys", "hw4_assets/data/items/level6decoys.json");
-        this.load.object("potions", "hw4_assets/data/items/level1potions.json");
+        this.load.object("potions", "hw4_assets/data/items/level6potions.json");
 
         // Load the sprites
         this.load.image("healthpack", "hw4_assets/sprites/healthpack.png");
@@ -799,7 +799,7 @@ export default class Level6 extends HW4Scene {
         }
 
         for (let potion of this.potions) {
-            if (potion.visible && this.player.collisionShape.overlaps(potion.boundary)) {
+            if (potion.visible && this.player.collisionShape.overlaps(potion.boundary) && this.player.alpha != .5) {
                 potion.visible = false;
                 this.player.alpha = .5;
                 this.invistime = this.time + 300;
