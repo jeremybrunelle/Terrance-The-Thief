@@ -60,25 +60,32 @@ import Level3 from "./Level3";
 import Level5 from "./Level5";
 import Level6 from "./Level6";
 import Level4Complete from "./Level4Complete";
+import LoudnessHUD from "../GameSystems/HUD/LoudnessHUD";
+import LockpickHUD from "../GameSystems/HUD/LockpickHUD";
+import Lockpick from "../GameSystems/Puzzles/Lockpick";
 
 export default class Level4 extends HW4Scene {
 
+    /** GameSystems in the HW4 Scene */
     /** GameSystems in the HW4 Scene */
     private inventoryHud: InventoryHUD;
 
     /** All the battlers in the HW4Scene (including the player) */
     private player;
     private playerHealthbar: HealthbarHUD;
+    private last_loud_increase: number;
+    private money_given: boolean;
+    private safe_opened: boolean;
     private battlers: (Battler & Actor)[];
     /** Healthbars for the battlers */
     private healthbars: Map<number, HealthbarHUD>;
-
+    private playerLoudnessBar: LoudnessHUD;
     private moneyLabel: Label;
     public money: number = 0;
     private time: number = 0;
     private spotted: boolean = false;
     private multiplier: number = 1;
-
+    private lockpick: Lockpick;
     private lasers: Array<Graphic>;
     private bases: BattlerBase[];
     private guards: Array<AnimatedSprite>;
@@ -136,7 +143,7 @@ export default class Level4 extends HW4Scene {
         this.load.spritesheet("guard", "hw4_assets/spritesheets/Guard.json");
 
         // Load the tilemap
-        this.load.tilemap("level", "hw4_assets/tilemaps/HW4Tilemap.json");
+        this.load.tilemap("level", "hw4_assets/tilemaps/level4.json");
 
         // Load the item loactions
         this.load.object("healthpacks", "hw4_assets/data/items/level4healthpacks.json");
@@ -166,7 +173,7 @@ export default class Level4 extends HW4Scene {
         this.load.image("moneybag", "hw4_assets/sprites/moneybag.png");
         this.load.image("decoy", "hw4_assets/sprites/decoy.png");
         this.load.image("money", "hw4_assets/sprites/money.png");
-        
+        this.load.image("lockpick", "hw4_assets/sprites/safe_puzzle.png");
 
         // Load the audios
         this.load.audio("siren", "hw4_assets/audio/siren.mp3");
@@ -200,17 +207,19 @@ export default class Level4 extends HW4Scene {
         this.initializePlayer();
         this.initializeItems();
         this.initializeUI();
+        this.initLockpickActivity();
 
         this.initializeNavmesh();
 
         // Create the NPCS
         this.initializeNPCs();
+        this.safe_opened = false;
 
         // Subscribe to relevant events
         this.receiver.subscribe("healthpack");
         this.receiver.subscribe("enemyDied");
         this.receiver.subscribe(ItemEvent.ITEM_REQUEST);
-
+        this.money_given = false;
         // Add a UI for health
         this.addUILayer("health");
 
@@ -234,15 +243,17 @@ export default class Level4 extends HW4Scene {
             }
         }
 
+
         while (this.receiver.hasNextEvent()) {
             this.handleEvent(this.receiver.getNextEvent());
         }
-
+        
         this.useDecoy();
         this.moveSpotlight(this.time);
         this.moveGuards(this.time);
         this.inventoryHud.update(deltaT);
         this.playerHealthbar.update(deltaT);
+        this.playerLoudnessBar.update(deltaT);
         this.healthbars.forEach(healthbar => healthbar.update(deltaT));
         for (let i = 0; i < this.lasers.length; i++) {
             let line = new Line(Vec2.ZERO, Vec2.ZERO);
@@ -250,6 +261,8 @@ export default class Level4 extends HW4Scene {
         }
         this.enterChase();
         this.levelCompleteCheck();
+        this.safeCheck();
+        this.checkLoudness();
         this.cheatCodeCheck();
         this.handlePlayerKilled();
         if(this.seenFlag){
@@ -259,9 +272,15 @@ export default class Level4 extends HW4Scene {
             }
             this.healthTimer++;
         }
-        this.time += 1;
-    }
 
+        this.time += 1;
+        if(this.time - this.last_loud_increase > 100){
+            this.player.loudness -=5;
+
+        
+    }
+}
+    
     /**
      * Handle events from the rest of the game
      * @param event a game event
@@ -333,7 +352,7 @@ export default class Level4 extends HW4Scene {
      */
     protected initializePlayer(): void {
         this.player = this.add.animatedSprite(PlayerActor, "player1", "primary");
-        this.player.position.set(40, 40);
+        this.player.position.set(40, 475);
 
         this.player.health = 10;
         this.player.maxHealth = 10;
@@ -352,6 +371,12 @@ export default class Level4 extends HW4Scene {
         // Give the player a healthbar
         this.playerHealthbar = new HealthbarHUD(this, this.player, "primary", {size: this.player.size.clone().scaled(2, 1/2), offset: this.player.size.clone().scaled(0, -1/2)});
 
+        this.playerLoudnessBar = new LoudnessHUD(this, this.player, "primary", {size: this.player.size.clone().scaled(2, 1/2), offset: this.player.size.clone().scaled(0, -1/2)});
+
+        this.playerLoudnessBar.visible = true;
+
+        this.player.loudness = 0;
+
         // Give the player PlayerAI
         this.player.addAI(PlayerAI);
 
@@ -367,9 +392,12 @@ export default class Level4 extends HW4Scene {
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
-        this.guards[0].position.set(100, 100);
-        this.guards[1].position.set(280, 150);
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards[0].position.set(300, 330);
+        this.guards[1].position.set(400, 150);
         this.guards[2].position.set(100, 260);
+        this.guards[3].position.set(265, 20);
+        this.guards[3].rotation = Math.PI/2;
 
     }
     protected enterChase(): void {
@@ -384,6 +412,9 @@ export default class Level4 extends HW4Scene {
         a mouse press */
 
         for (let i = 0; i < this.guards.length; i++) {
+            if (i==3){
+                return;
+            }
 
             let distracted = false;
             for (let j = 0; j < this.moneys.length; j++) {
@@ -433,6 +464,19 @@ export default class Level4 extends HW4Scene {
             
         }    
     }
+    protected initLockpickActivity(): void {
+        //this.lockpick= this.load.getObject("lockpick");
+         let sprite= this.add.sprite("lockpick", "primary");
+         
+         this.lockpick = new Lockpick(sprite, 15);
+        
+         this.lockpick.position.set(300, 20);
+         this.lockpick.updateBoundary();
+         this.lockpick.status = false;
+         this.lockpick.progress = 0;
+         //this.LockpickHUD = new LockpickHUD(this, this.lockpick, "primary", {size: this.player.size.clone().scaled(2, 1/2), offset: this.player.size.clone().scaled(0, -1/2)});
+ 
+     }
 
     /**
      * Initialize the items in the scene
@@ -447,31 +491,28 @@ export default class Level4 extends HW4Scene {
             this.healthpacks[i].updateBoundary();
         }
     
-        let keys = this.load.getObject("keys");
-        this.keys = new Array<Key>(keys.items.length);
-        for (let i = 0; i < keys.items.length; i++) {
-            let sprite = this.add.sprite("key", "primary");
-            this.keys[i] = new Key(sprite);
-            this.keys[i].position.set(keys.items[i][0], keys.items[i][1]);
-            this.keys[i].updateBoundary();
-        }
+       
 
-        let vents = this.load.getObject("vents");
-        this.vents = new Array<Vent>(vents.items.length);
-        for (let i = 0; i < vents.items.length; i++) {
-            let sprite = this.add.sprite("vent", "primary");
-            this.vents[i] = new Vent(sprite);
-            this.vents[i].position.set(vents.items[i][0], vents.items[i][1]);
-            this.vents[i].updateBoundary();
-        }
 
-        let safes = this.load.getObject("safes");
-        this.safes = new Array<Safe>(safes.items.length);
-        for (let i = 0; i < safes.items.length; i++) {
-            let sprite = this.add.sprite("safe", "primary");
-            this.safes[i] = new Safe(sprite);
-            this.safes[i].position.set(safes.items[i][0], safes.items[i][1]);
-            this.safes[i].updateBoundary();
+    
+/*
+        let obstacles = this.load.getObject("obstacles");
+        this.obstacles = new Array<Obstacle>(obstacles.items.length);
+        for (let i = 0; i < obstacles.items.length; i++) {
+            let sprite = this.add.sprite("obstacle", "primary");
+            this.obstacles[i] = new Obstacle(sprite);
+            this.obstacles[i].position.set(obstacles.items[i][0], obstacles.items[i][1]);
+            this.obstacles[i].updateBoundary();
+        }
+        */
+
+        let lockers = this.load.getObject("lockers");
+        this.lockers = new Array<Locker>(lockers.items.length);
+        for (let i = 0; i < lockers.items.length; i++) {
+            let sprite = this.add.sprite("locker", "primary");
+            this.lockers[i] = new Locker(sprite);
+            this.lockers[i].position.set(lockers.items[i][0], lockers.items[i][1]);
+            this.lockers[i].updateBoundary();
         }
 
         let obstacles = this.load.getObject("obstacles");
@@ -483,41 +524,7 @@ export default class Level4 extends HW4Scene {
             this.obstacles[i].updateBoundary();
         }
 
-        let lockers = this.load.getObject("lockers");
-        this.lockers = new Array<Locker>(lockers.items.length);
-        for (let i = 0; i < lockers.items.length; i++) {
-            let sprite = this.add.sprite("locker", "primary");
-            this.lockers[i] = new Locker(sprite);
-            this.lockers[i].position.set(lockers.items[i][0], lockers.items[i][1]);
-            this.lockers[i].updateBoundary();
-        }
 
-        let electricities = this.load.getObject("electricities");
-        this.electricities = new Array<Electricity>(electricities.items.length);
-        for (let i = 0; i < electricities.items.length; i++) {
-            let sprite = this.add.sprite("electricity", "primary");
-            this.electricities[i] = new Electricity(sprite);
-            this.electricities[i].position.set(electricities.items[i][0], electricities.items[i][1]);
-            this.electricities[i].updateBoundary();
-        }
-
-        let switches = this.load.getObject("switches");
-        this.switches = new Array<Switch>(switches.items.length);
-        for (let i = 0; i < switches.items.length; i++) {
-            let sprite = this.add.sprite("switch", "primary");
-            this.switches[i] = new Switch(sprite);
-            this.switches[i].position.set(switches.items[i][0], switches.items[i][1]);
-            this.switches[i].updateBoundary();
-        }
-
-        let offs = this.load.getObject("offs");
-        this.offs = new Array<Off>(offs.items.length);
-        for (let i = 0; i < offs.items.length; i++) {
-            let sprite = this.add.sprite("off", "primary");
-            this.offs[i] = new Off(sprite);
-            this.offs[i].position.set(offs.items[i][0], offs.items[i][1]);
-            this.offs[i].updateBoundary();
-        }
 
         let moneybags = this.load.getObject("moneybags");
         this.moneybags = new Array<Moneybag>(moneybags.items.length);
@@ -526,7 +533,10 @@ export default class Level4 extends HW4Scene {
             this.moneybags[i] = new Moneybag(sprite);
             this.moneybags[i].position.set(moneybags.items[i][0], moneybags.items[i][1]);
             this.moneybags[i].updateBoundary();
+
         }
+
+
 
         let decoys = this.load.getObject("decoys");
         this.decoys = new Array<Decoy>(decoys.items.length);
@@ -536,7 +546,7 @@ export default class Level4 extends HW4Scene {
             this.decoys[i].position.set(decoys.items[i][0], decoys.items[i][1]);
             this.decoys[i].updateBoundary();
         }
-
+        
         this.lasers = new Array<Line>(6);
         for (let i = 0; i < this.lasers.length; i++) {
             let line = new Line(Vec2.ZERO, Vec2.ZERO);
@@ -721,14 +731,14 @@ export default class Level4 extends HW4Scene {
                     this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "siren", loop: false, holdReference: true});
                     //Player has been spotted, spawn more guards and make them stronger
                     this.spotted = true;
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards[3].position.set(250, 250);
-                    this.guards[4].position.set(300, 350);
-                    this.guards[5].position.set(350, 100);
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "uaurd", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+                    this.guards[4].position.set(250, 250);
+                    this.guards[5].position.set(300, 350);
+                    this.guards[6].position.set(350, 100);
                     //Set the multiplier to 2, guards now twice as fast and do twice as much damage
-                    this.multiplier = 2;
+                    this.multiplier = 1.2;
                 }
             }
         }
@@ -745,21 +755,6 @@ export default class Level4 extends HW4Scene {
             }
         }
 
-        for (let electricity of this.electricities) {
-            if (electricity.visible && this.player.collisionShape.overlaps(electricity.boundary) && this.player.alpha != .5) {
-                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "electricity", loop: false, holdReference: true});
-                this.player.health -= 1;
-            }
-        }
-
-        for (let off of this.offs) {
-            if (off.visible && this.player.collisionShape.overlaps(off.boundary)) {
-                for (let electricity of this.electricities) {
-                    electricity.visible = false;
-                }
-                off.visible = false;
-            }
-        }
 
         for (let moneybag of this.moneybags) {
             if (moneybag.visible && this.player.collisionShape.overlaps(moneybag.boundary)) {
@@ -798,10 +793,10 @@ export default class Level4 extends HW4Scene {
     moveSpotlight(time: number) {
         for (let i = 0; i < this.obstacles.length; i++) {
             if (time % 400 > 199) {
-                this.obstacles[i].position.y += .5;
+                this.obstacles[i].position.x += .5;
             }
             else {
-                this.obstacles[i].position.y -= .5;
+                this.obstacles[i].position.x -= .5;
             }
             this.obstacles[i].updateBoundary();
         }
@@ -835,10 +830,10 @@ export default class Level4 extends HW4Scene {
             }
             if (i == 3 && this.guards[3].alpha != .99) {
                 if (time % 400 > 199) {
-                    this.guards[3].position.y += .5;
+                    this.guards[3].position.y -= 0;
                 }
                 else {
-                    this.guards[3].position.y -= .5;
+                    this.guards[3].position.y += 0;
                 } 
             }
             if (i == 4 && this.guards[4].alpha != .99) {
@@ -862,18 +857,84 @@ export default class Level4 extends HW4Scene {
 
     levelCompleteCheck() {
         let levelComplete = true;
-        if (this.money > 200) {
-            for (let safe of this.safes) {
-                if (safe.unlooted) {
-                    levelComplete = false;
-                }
-            }
-            if (levelComplete) {
+        if (this.safe_opened != true) {
+            levelComplete = false;
+
+        }
+            if (levelComplete ) {
+ 
                 this.sceneManager.changeToScene(Level4Complete);
             }
         }
+    
+    safeCheck() {
+        if(this.lockpick.progress >=15 && !this.safe_opened){
+            console.log("Safe opened");
+            this.money += 100;
+            this.moneyLabel.text = `$: ${this.money}`;
+            this.safe_opened = true;
+        }
+
+        if(this.player.collisionShape.overlaps(this.lockpick.boundary) && Input.isKeyJustPressed('e')){
+        this.lockpick.increaseProgress();
+        console.log(this.lockpick.progress);
+        this.player.loudness += 1;
+        console.log(this.player.loudness);  
+        this.last_loud_increase = this.time;
     }
 
+}
+
+checkLoudness(){
+    for (let i = 0; i < this.guards.length; i++) {
+
+        let distracted = false;
+        for (let j = 0; j < this.moneys.length; j++) {
+            if (this.guards[i].position.distanceTo(this.moneys[j].position) < 25) {
+                distracted = true
+            }
+        }
+    
+        if (this.guards[i].position.distanceTo(this.player.position) < 5 && !distracted && this.player.alpha != .5) {
+            this.player.health -= .02*this.multiplier;
+            this.guards[i].alpha = .99;
+            let xpos = this.player.position.x;
+            let ypos = this.player.position.y;
+
+            if (this.time % 20 > 18) {
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "shoot", loop: false, holdReference: true});
+            }
+        }
+        else if (this.guards[i].position.distanceTo(this.player.position) < 50 && this.player.loudness > 10
+        && !distracted) {
+            this.seenFlag = true;
+            if (this.player.alpha != .5) {
+                this.player.health -= .02*this.multiplier;
+            }
+            this.guards[i].alpha = .99;
+            let xpos = this.player.position.x;
+            let ypos = this.player.position.y;
+            //this.lasers[i] = new Line(this.player.position, this.guards[i].position);
+            //this.lasers[i] = this.add.graphic(GraphicType.LINE, "primary", {start: this.player.position, end: this.guards[i].position});
+            if (this.time % 20 > 18) {
+                this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "shoot", loop: false, holdReference: true});
+            }
+            if (this.guards[i].position.x > this.player.position.x) {
+                this.guards[i].position.x -= .7*this.multiplier;
+            }else{
+                this.guards[i].position.x += .7*this.multiplier;
+            }
+            if (this.guards[i].position.y > this.player.position.y) {
+                this.guards[i].position.y -= .7*this.multiplier;
+            }else{
+                this.guards[i].position.y += .7*this.multiplier;
+            }
+        }else{
+            this.seenFlag = false;
+
+        }
+}
+}
     cheatCodeCheck() {
         
         if (Input.isJustPressed("1")) {

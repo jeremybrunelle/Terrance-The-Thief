@@ -355,7 +355,7 @@ export default class Level2 extends HW4Scene {
      */
     protected initializePlayer(): void {
         this.player = this.add.animatedSprite(PlayerActor, "player1", "primary");
-        this.player.position.set(40, 40);
+        this.player.position.set(40, 150);
 
         this.player.health = 10;
         this.player.maxHealth = 10;
