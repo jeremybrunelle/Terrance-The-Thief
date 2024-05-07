@@ -38,21 +38,21 @@ export default class MainMenu extends Scene {
         sprite.scale = new Vec2(8.3, 8.3);
         sprite.position = new Vec2(500, 500);
 
-        const play = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x + 280, center.y - 275), text: "Play"});
+        const play = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x + 290, center.y - 100), text: "Play"});
         play.size.set(200, 50);
         play.borderWidth = 2;
         play.borderColor = Color.WHITE;
         play.backgroundColor = Color.TRANSPARENT;
         play.onClickEventId = "play";
 
-        const controls = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x + 280, center.y - 175), text: "Controls"});
+        const controls = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x + 290, center.y), text: "Controls"});
         controls.size.set(200, 50);
         controls.borderWidth = 2;
         controls.borderColor = Color.WHITE;
         controls.backgroundColor = Color.TRANSPARENT;
         controls.onClickEventId = "controls";
 
-        const help = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x + 280, center.y - 75), text: "How to Play"});
+        const help = this.add.uiElement(UIElementType.BUTTON, "mainMenu", {position: new Vec2(center.x + 290, center.y + 100), text: "How to Play"});
         help.size.set(200, 50);
         help.borderWidth = 2;
         help.borderColor = Color.WHITE;

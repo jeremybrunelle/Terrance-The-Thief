@@ -269,7 +269,11 @@ export default class Level1 extends HW4Scene {
             }
             this.healthTimer++;
         }
+        
         this.time += 1;
+        if (this.time == 2400) {
+            this.time = 0;
+        }
     }
 
     /**
