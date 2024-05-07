@@ -28,6 +28,8 @@ export default class HelpScene extends Scene {
         const line3 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y), text: "Avoid electricity by activating off switches."});
         const line4 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y+50), text: "Use vents to move around the map and avoid guards."});
         const line5 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y+100), text: "Use lockers to make yourself invisible."});
+        const line6 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y+150), text: "Use potions to make yourself invincible."});
+        const line7 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y+200), text: "Use decoys to distract guards."});
         //const line6 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y), text: "Controls:"});
         //const line7 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y), text: "Controls:"});
 
@@ -37,8 +39,8 @@ export default class HelpScene extends Scene {
         line3.textColor = Color.WHITE;
         line4.textColor = Color.WHITE;
         line5.textColor = Color.WHITE;
-        //line6.textColor = Color.WHITE;
-        //line7.textColor = Color.WHITE;
+        line6.textColor = Color.WHITE;
+        line7.textColor = Color.WHITE;
 
     }
 

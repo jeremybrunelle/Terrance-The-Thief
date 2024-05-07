@@ -323,6 +323,7 @@ export default class Level3 extends HW4Scene {
 
     protected handlePlayerKilled(): void {
         if (this.player.health <= 0) {
+            this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "levelMusic"});
             this.sceneManager.changeToScene(GameOver);
         }
     }
@@ -842,6 +843,7 @@ export default class Level3 extends HW4Scene {
                 }
             }
             if (levelComplete) {
+                this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "levelMusic"});
                 this.sceneManager.changeToScene(Level3Complete);
             }
         }
@@ -850,21 +852,27 @@ export default class Level3 extends HW4Scene {
     cheatCodeCheck() {
         
         if (Input.isJustPressed("1")) {
+            this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "levelMusic"});
             this.sceneManager.changeToScene(Level1);
         }
         if (Input.isJustPressed("2")) {
+            this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "levelMusic"});
             this.sceneManager.changeToScene(Level2);
         }
         if (Input.isJustPressed("3")) {
+            this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "levelMusic"});
             this.sceneManager.changeToScene(Level3);
         }
         if (Input.isJustPressed("4")) {
+            this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "levelMusic"});
             this.sceneManager.changeToScene(Level4);
         }
         if (Input.isJustPressed("5")) {
+            this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "levelMusic"});
             this.sceneManager.changeToScene(Level5);
         }
         if (Input.isJustPressed("6")) {
+            this.emitter.fireEvent(GameEventType.STOP_SOUND, {key: "levelMusic"});
             this.sceneManager.changeToScene(Level6);
         }
         if (Input.isJustPressed("7")) {

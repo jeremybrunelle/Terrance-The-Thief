@@ -28,6 +28,7 @@ export default class ControlsScene extends Scene {
         const line3 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y), text: "S- Move down"});
         const line4 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y+50), text: "A- Move left"});
         const line5 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y+100), text: "D- Move right"});
+        const line6 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y+150), text: "Mouse click- use decoy"});
         //const line6 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y), text: "Controls:"});
         //const line7 = <Label>this.add.uiElement(UIElementType.LABEL, "primary", {position: new Vec2(center.x, center.y), text: "Controls:"});
 
@@ -37,7 +38,7 @@ export default class ControlsScene extends Scene {
         line3.textColor = Color.WHITE;
         line4.textColor = Color.WHITE;
         line5.textColor = Color.WHITE;
-        //line6.textColor = Color.WHITE;
+        line6.textColor = Color.WHITE;
         //line7.textColor = Color.WHITE;
 
     }
