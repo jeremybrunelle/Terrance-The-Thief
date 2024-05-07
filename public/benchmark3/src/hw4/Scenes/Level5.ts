@@ -140,7 +140,7 @@ export default class Level5 extends HW4Scene {
         this.load.spritesheet("guard", "hw4_assets/spritesheets/Guard.json");
 
         // Load the tilemap
-        this.load.tilemap("level", "hw4_assets/tilemaps/HW4Tilemap.json");
+        this.load.tilemap("level", "hw4_assets/tilemaps/tilemap-level5.json");
 
         // Load the item loactions
         this.load.object("healthpacks", "hw4_assets/data/items/level5healthpacks.json");
@@ -377,9 +377,11 @@ export default class Level5 extends HW4Scene {
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
-        this.guards[0].position.set(100, 100);
+        this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+        this.guards[0].position.set(270, 370);
         this.guards[1].position.set(280, 150);
-        this.guards[2].position.set(100, 260);
+        this.guards[2].position.set(230, 260);
+        this.guards[3].position.set(355, 200);
 
     }
     protected enterChase(): void {
@@ -745,8 +747,9 @@ export default class Level5 extends HW4Scene {
                     this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
                     this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
                     this.guards[3].position.set(250, 250);
-                    this.guards[4].position.set(300, 350);
+                    this.guards[4].position.set(205, 70);
                     this.guards[5].position.set(350, 100);
+
                     //Set the multiplier to 2, guards now twice as fast and do twice as much damage
                     this.multiplier = 2;
                 }

@@ -141,7 +141,7 @@ export default class Level6 extends HW4Scene {
 
 
         // Load the tilemap
-        this.load.tilemap("level", "hw4_assets/tilemaps/HW4Tilemap.json");
+        this.load.tilemap("level", "hw4_assets/tilemaps/tilemap-level6.json");
 
         // Load the item loactions
         this.load.object("healthpacks", "hw4_assets/data/items/level6healthpacks.json");
@@ -379,9 +379,9 @@ export default class Level6 extends HW4Scene {
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
         this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
-        this.guards[0].position.set(100, 100);
-        this.guards[1].position.set(280, 150);
-        this.guards[2].position.set(100, 260);
+        this.guards[0].position.set(250, 450);
+        this.guards[1].position.set(290, 310);
+        this.guards[2].position.set(220, 380);
 
     }
     protected enterChase(): void {
@@ -743,12 +743,16 @@ export default class Level6 extends HW4Scene {
                     this.emitter.fireEvent(GameEventType.PLAY_SOUND, {key: "siren", loop: false, holdReference: true});
                     //Player has been spotted, spawn more guards and make them stronger
                     this.spotted = true;
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards.push(this.add.animatedSprite(NPCActor, "player1", "primary"));
-                    this.guards[3].position.set(250, 250);
-                    this.guards[4].position.set(300, 350);
-                    this.guards[5].position.set(350, 100);
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+                    this.guards.push(this.add.animatedSprite(NPCActor, "guard", "primary"));
+                    this.guards[3].position.set(230, 250);
+                    this.guards[4].position.set(40, 310);
+                    this.guards[5].position.set(350, 350);
+                    this.guards[6].position.set(440, 420);
+                    this.guards[7].position.set(430, 40);
                     //Set the multiplier to 2, guards now twice as fast and do twice as much damage
                     this.multiplier = 2;
                 }
